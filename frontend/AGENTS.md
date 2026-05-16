@@ -50,9 +50,12 @@ frontend/
 ### Styling
 - Scoped CSS in every component
 - No CSS framework (lightweight)
-- CSS custom properties for theme
+- CSS custom properties for theme and breakpoints
 - Blue primary (#1a56db), gray background (#f3f4f6)
 - Professional business aesthetic
+- Responsive: hamburger menu on mobile, slide-in sidebar overlay
+- Container queries (`@container`) for component-level responsive layout in views
+- Media queries (`@media`) for layout-level changes (sidebar behavior)
 
 ### API Client
 - Fetch wrapper around `/api/*`
