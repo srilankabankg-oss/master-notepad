@@ -6,9 +6,10 @@ import { useReviewStore } from '@/stores/reviews'
 import { useCommentStore } from '@/stores/comments'
 import { useMeetingStore } from '@/stores/meetings'
 import { useSurveyStore } from '@/stores/surveys'
+import { useEventStore } from '@/stores/events'
 import { useEmployeeStore } from '@/stores/employees'
 import { errorMessage } from '@/api/client'
-import type { Subcontractor, Review, Comment, Meeting, Survey, ReviewCreate, CommentCreate, MeetingCreate, SurveyCreate } from '@/types/api'
+import type { Subcontractor, Review, Comment, Meeting, Survey, ReviewCreate, CommentCreate, MeetingCreate, SurveyCreate, ContractorEvent, ContractorEventCreate, EventType } from '@/types/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,13 +18,14 @@ const reviewStore = useReviewStore()
 const commentStore = useCommentStore()
 const meetingStore = useMeetingStore()
 const surveyStore = useSurveyStore()
+const eventStore = useEventStore()
 const employeeStore = useEmployeeStore()
 
 const subId = Number(route.params.id)
 const sub = ref<Subcontractor | null>(null)
 const loading = ref(true)
 const error = ref('')
-const activeTab = ref<'reviews' | 'comments' | 'meetings' | 'surveys'>('reviews')
+const activeTab = ref<'reviews' | 'comments' | 'meetings' | 'surveys' | 'events'>('reviews')
 
 const reviewForm = ref(false)
 const reviewData = ref<ReviewCreate>({ subcontractorId: subId, employeeId: 0, content: '', rating: 5 })
@@ -54,6 +56,17 @@ const surveyResponseForm = ref(false)
 const surveyResponseSurveyId = ref(0)
 const surveyResponseAnswers = ref<Record<string, string>>({})
 const surveyResponseError = ref('')
+
+const eventTypes: EventType[] = ['positive', 'violation', 'info']
+
+const eventForm = ref(false)
+const eventEditingId = ref<number | null>(null)
+const eventData = ref<ContractorEventCreate>({
+  subcontractorId: subId, employeeId: 0, type: 'info', description: '',
+  eventDate: new Date().toISOString().slice(0, 16),
+})
+const eventError = ref('')
+const eventSaving = ref(false)
 
 const employeesLoaded = ref(false)
 
@@ -97,6 +110,10 @@ async function loadMeetings() {
 
 async function loadSurveys() {
   await surveyStore.fetchAll()
+}
+
+async function loadEvents() {
+  await eventStore.fetchAll(subId)
 }
 
 async function loadEmployees() {
@@ -268,6 +285,66 @@ async function submitResponse() {
   }
 }
 
+function eventTypeLabel(type: EventType): string {
+  return { positive: 'Позитивное', violation: 'Нарушение', info: 'Информация' }[type]
+}
+
+function eventTypeClass(type: EventType): string {
+  return `badge-${type}`
+}
+
+async function submitEvent() {
+  if (!eventData.value.description.trim()) { eventError.value = 'Описание обязательно'; return }
+  if (!eventData.value.employeeId) { eventError.value = 'Выберите сотрудника'; return }
+  eventSaving.value = true
+  eventError.value = ''
+  try {
+    if (eventEditingId.value) {
+      await eventStore.update(eventEditingId.value, { ...eventData.value })
+    } else {
+      await eventStore.create({ ...eventData.value, subcontractorId: subId })
+    }
+    eventForm.value = false
+    await loadEvents()
+  } catch (e: unknown) {
+    eventError.value = errorMessage(e, 'Ошибка')
+  } finally {
+    eventSaving.value = false
+  }
+}
+
+function openEventCreate() {
+  eventEditingId.value = null
+  eventData.value = {
+    subcontractorId: subId, employeeId: 0, type: 'info', description: '',
+    eventDate: new Date().toISOString().slice(0, 16),
+  }
+  eventError.value = ''
+  eventForm.value = true
+}
+
+function openEventEdit(ev: ContractorEvent) {
+  eventEditingId.value = ev.id
+  eventData.value = {
+    subcontractorId: ev.subcontractor_id,
+    employeeId: ev.employee_id,
+    type: ev.type,
+    description: ev.description,
+    eventDate: new Date(ev.event_date).toISOString().slice(0, 16),
+  }
+  eventError.value = ''
+  eventForm.value = true
+}
+
+async function deleteEvent(id: number) {
+  if (!confirm('Удалить событие?')) return
+  try {
+    await eventStore.remove(id)
+  } catch (e: unknown) {
+    alert(errorMessage(e, 'Ошибка удаления'))
+  }
+}
+
 function getEmployeeName(id: number): string {
   const emp = employeeStore.items.find((e) => e.id === id)
   return emp ? emp.name : `#${id}`
@@ -279,7 +356,7 @@ watch(() => surveyStore.items, () => {
 }, { immediate: true, deep: true })
 
 onMounted(async () => {
-  await Promise.all([loadSubcontractor(), loadReviews(), loadComments(), loadMeetings(), loadSurveys(), loadEmployees()])
+  await Promise.all([loadSubcontractor(), loadReviews(), loadComments(), loadMeetings(), loadSurveys(), loadEvents(), loadEmployees()])
 })
 </script>
 
@@ -312,12 +389,12 @@ onMounted(async () => {
 
       <div class="tabs">
         <button
-          v-for="tab in (['reviews', 'comments', 'meetings', 'surveys'] as const)"
+          v-for="tab in (['reviews', 'comments', 'meetings', 'surveys', 'events'] as const)"
           :key="tab"
           :class="['tab', { active: activeTab === tab }]"
           @click="activeTab = tab"
         >
-          {{ { reviews: 'Отзывы', comments: 'Комментарии', meetings: 'Протоколы', surveys: 'Опросы' }[tab] }}
+          {{ { reviews: 'Отзывы', comments: 'Комментарии', meetings: 'Протоколы', surveys: 'Опросы', events: 'События' }[tab] }}
         </button>
       </div>
 
@@ -509,6 +586,53 @@ onMounted(async () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div v-if="activeTab === 'events'" class="tab-content">
+        <button class="btn btn-primary btn-sm" @click="openEventCreate">Записать событие</button>
+
+        <div v-if="eventForm" class="inline-form">
+          <h4>{{ eventEditingId ? 'Изменить событие' : 'Новое событие' }}</h4>
+          <label class="field">
+            <span class="field-label">Сотрудник *</span>
+            <select v-model="eventData.employeeId" class="input">
+              <option :value="0" disabled>Выберите сотрудника</option>
+              <option v-for="emp in employeeStore.items" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Тип</span>
+            <select v-model="eventData.type" class="input">
+              <option v-for="t in eventTypes" :key="t" :value="t">{{ eventTypeLabel(t) }}</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Описание *</span>
+            <textarea v-model="eventData.description" class="input textarea" rows="3" />
+          </label>
+          <label class="field">
+            <span class="field-label">Дата события</span>
+            <input type="datetime-local" v-model="eventData.eventDate" class="input" />
+          </label>
+          <div v-if="eventError" class="form-error">{{ eventError }}</div>
+          <div class="form-row">
+            <button class="btn btn-secondary btn-sm" @click="eventForm = false">Отмена</button>
+            <button class="btn btn-primary btn-sm" :disabled="eventSaving" @click="submitEvent">Сохранить</button>
+          </div>
+        </div>
+
+        <div v-if="eventStore.items.length === 0 && !eventForm" class="state-message">Нет событий</div>
+
+        <div v-for="ev in eventStore.items" :key="ev.id" class="item-card">
+          <div class="item-head">
+            <span :class="['event-badge-detail', eventTypeClass(ev.type)]">{{ eventTypeLabel(ev.type) }}</span>
+            <span class="item-date">{{ formatDate(ev.event_date) }}</span>
+            <span class="item-author">{{ getEmployeeName(ev.employee_id) }}</span>
+            <button class="btn btn-sm btn-ghost" @click="openEventEdit(ev)">Изменить</button>
+            <button class="btn btn-sm btn-ghost btn-danger" @click="deleteEvent(ev.id)">Удалить</button>
+          </div>
+          <div class="item-body">{{ ev.description }}</div>
         </div>
       </div>
     </template>
@@ -704,6 +828,16 @@ onMounted(async () => {
 .state-message { padding: 32px 0; text-align: center; color: #6b7280; font-size: 15px; }
 .state-error { color: #dc2626; }
 .form-error { color: #dc2626; font-size: 13px; }
+
+.event-badge-detail {
+  display: inline-flex; align-items: center;
+  padding: 2px 10px; border-radius: 12px;
+  font-size: 12px; font-weight: 600;
+}
+
+.badge-positive { background: #dcfce7; color: #166534; }
+.badge-violation { background: #fef2f2; color: #991b1b; }
+.badge-info { background: #dbeafe; color: #1e40af; }
 
 .btn {
   display: inline-flex;

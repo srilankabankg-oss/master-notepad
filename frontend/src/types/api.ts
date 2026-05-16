@@ -173,6 +173,26 @@ export interface SurveyResponseCreate {
   answers: Record<string, string>
 }
 
+export type EventType = 'positive' | 'violation' | 'info'
+
+export interface ContractorEvent {
+  id: number
+  subcontractor_id: number
+  employee_id: number
+  type: EventType
+  description: string
+  event_date: string
+  created_at: string
+}
+
+export interface ContractorEventCreate {
+  subcontractorId: number
+  employeeId: number
+  type: EventType
+  description: string
+  eventDate: string
+}
+
 export interface ApiError {
   error: string
   details?: string[]

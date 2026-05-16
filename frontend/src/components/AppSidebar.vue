@@ -25,6 +25,7 @@ const navItems = [
   { to: '/surveys', label: 'Опросы', name: 'surveys' },
   { to: '/employees', label: 'Сотрудники', name: 'employees' },
   { to: '/suggestions', label: 'Предложения', name: 'suggestions' },
+  { to: '/events', label: 'События', name: 'events' },
 ]
 
 function isActive(name: string) {

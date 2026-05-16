@@ -50,6 +50,7 @@ backend/
 | MeetingProtocols | `meeting_protocols` | Standard meeting minutes |
 | Surveys | `surveys` | Employee surveys with JSON questions |
 | SurveyResponses | `survey_responses` | Individual responses to surveys |
+| ContractorEvents | `contractor_events` | Event log: positive/violation/info entries |
 
 ### Rating System
 - Reviews have `rating` field (integer, 1-10)

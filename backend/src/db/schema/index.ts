@@ -4,6 +4,7 @@ import { relations } from 'drizzle-orm';
 // ── Enums ──
 export const suggestionStatusEnum = pgEnum('suggestion_status', ['pending', 'approved', 'rejected']);
 export const checklistTypeEnum = pgEnum('checklist_type', ['organization', 'personal']);
+export const eventTypeEnum = pgEnum('event_type', ['positive', 'violation', 'info']);
 
 // ── Employees ──
 export const employees = pgTable('employees', {
@@ -95,6 +96,17 @@ export const surveys = pgTable('surveys', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// ── Contractor Events ──
+export const contractorEvents = pgTable('contractor_events', {
+  id: serial('id').primaryKey(),
+  subcontractorId: integer('subcontractor_id').references(() => subcontractors.id, { onDelete: 'cascade' }).notNull(),
+  employeeId: integer('employee_id').references(() => employees.id, { onDelete: 'cascade' }).notNull(),
+  type: eventTypeEnum('type').notNull(),
+  description: text('description').notNull(),
+  eventDate: timestamp('event_date').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // ── Survey Responses ──
 export const surveyResponses = pgTable('survey_responses', {
   id: serial('id').primaryKey(),
@@ -112,6 +124,7 @@ export const employeesRelations = relations(employees, ({ many }) => ({
   suggestions: many(checklistSuggestions),
   surveys: many(surveys, { relationName: 'createdSurveys' }),
   responses: many(surveyResponses),
+  events: many(contractorEvents),
 }));
 
 export const subcontractorsRelations = relations(subcontractors, ({ many }) => ({
@@ -119,6 +132,7 @@ export const subcontractorsRelations = relations(subcontractors, ({ many }) => (
   comments: many(comments),
   meetings: many(meetingProtocols),
   surveys: many(surveys),
+  events: many(contractorEvents),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -154,4 +168,9 @@ export const surveysRelations = relations(surveys, ({ one, many }) => ({
 export const surveyResponsesRelations = relations(surveyResponses, ({ one }) => ({
   survey: one(surveys, { fields: [surveyResponses.surveyId], references: [surveys.id] }),
   employee: one(employees, { fields: [surveyResponses.employeeId], references: [employees.id] }),
+}));
+
+export const contractorEventsRelations = relations(contractorEvents, ({ one }) => ({
+  subcontractor: one(subcontractors, { fields: [contractorEvents.subcontractorId], references: [subcontractors.id] }),
+  employee: one(employees, { fields: [contractorEvents.employeeId], references: [employees.id] }),
 }));

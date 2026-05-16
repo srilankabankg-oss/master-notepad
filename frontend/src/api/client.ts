@@ -8,6 +8,7 @@ import type {
   Meeting, MeetingCreate,
   Survey, SurveyCreate,
   SurveyResponse, SurveyResponseCreate,
+  ContractorEvent, ContractorEventCreate,
 } from '@/types/api'
 
 const BASE_URL = '/api'
@@ -144,6 +145,20 @@ export const api = {
       request<Meeting>(`/meetings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) =>
       request<void>(`/meetings/${id}`, { method: 'DELETE' }),
+  },
+
+  events: {
+    list: (subcontractorId?: number) =>
+      request<ContractorEvent[]>(`/events${qs({ subcontractorId })}`),
+    get: (id: number) => request<ContractorEvent>(`/events/${id}`),
+    create: (data: ContractorEventCreate) =>
+      request<ContractorEvent>('/events', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<ContractorEventCreate>) =>
+      request<ContractorEvent>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      request<void>(`/events/${id}`, { method: 'DELETE' }),
+    suggest: (id: number, checklistId: number, employeeId: number) =>
+      request<Suggestion>(`/events/${id}/suggest`, { method: 'POST', body: JSON.stringify({ checklistId, employeeId }) }),
   },
 
   surveys: {
