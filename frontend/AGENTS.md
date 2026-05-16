@@ -19,9 +19,19 @@ frontend/
 │   │   ├── comments.ts
 │   │   ├── checklists.ts
 │   │   ├── suggestions.ts
+│   │   ├── events.ts
 │   │   ├── meetings.ts
 │   │   └── surveys.ts
 │   ├── views/            # Page components
+│   │   ├── SubcontractorsView.vue
+│   │   ├── SubcontractorDetail.vue
+│   │   ├── ReviewsView.vue
+│   │   ├── ChecklistsView.vue
+│   │   ├── MeetingsView.vue
+│   │   ├── SurveysView.vue
+│   │   ├── EmployeesView.vue
+│   │   ├── SuggestionsView.vue
+│   │   └── EventsView.vue
 │   └── components/       # Reusable components (layout)
 ├── vite.config.ts        # Vite + Vue plugin + PWA plugin + proxy
 ├── tsconfig.json
