@@ -4,6 +4,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { useTenderStore } from '@/stores/tender'
 import { useEmployeeStore } from '@/stores/employees'
 import { errorMessage } from '@/api/client'
+import { useEmployeeName } from '@/composables/useEntityName'
+import { ratingColor } from '@/composables/useRating'
+import { formatDate, formatDateTime } from '@/composables/useDateFormatter'
+import { eventTypeLabel, eventTypeClass } from '@/composables/useEventLabels'
+import EventBadge from '@/components/EventBadge.vue'
 import type { TenderSummary, Subcontractor, Review, ContractorEvent, Meeting, Comment } from '@/types/api'
 
 const route = useRoute()
@@ -16,32 +21,7 @@ const summary = ref<TenderSummary | null>(null)
 const loading = ref(true)
 const error = ref('')
 
-function ratingColor(rating: number): string {
-  if (rating >= 7) return '#16a34a'
-  if (rating >= 5) return '#ca8a04'
-  return '#dc2626'
-}
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('ru-RU')
-}
-
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('ru-RU')
-}
-
-function eventTypeLabel(type: ContractorEvent['type']): string {
-  return { positive: 'Позитивное', violation: 'Нарушение', info: 'Информация' }[type]
-}
-
-function eventTypeClass(type: ContractorEvent['type']): string {
-  return `badge-${type}`
-}
-
-function getEmployeeName(id: number): string {
-  const emp = employeeStore.items.find((e) => e.id === id)
-  return emp ? emp.name : (id != null ? `#${id}` : '—')
-}
+const getEmployeeName = useEmployeeName(employeeStore.items)
 
 onMounted(async () => {
   loading.value = true
@@ -113,7 +93,7 @@ onMounted(async () => {
         <h3 class="section-title">События</h3>
         <div v-for="ev in summary.events" :key="ev.id" class="item-card">
           <div class="item-head">
-            <span :class="['event-badge-detail', eventTypeClass(ev.type)]">{{ eventTypeLabel(ev.type) }}</span>
+            <EventBadge :type="ev.type" />
             <span class="item-date">{{ formatDate(ev.eventDate) }}</span>
             <span class="item-author">{{ getEmployeeName(ev.employeeId) }}</span>
           </div>
@@ -159,17 +139,17 @@ onMounted(async () => {
 .btn-back {
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0;
   margin-bottom: 1rem;
 }
 
-.btn-back:hover { color: #1a56db; }
+.btn-back:hover { color: var(--color-primary); }
 
 .detail-card {
-  background: #ffffff;
+  background: var(--color-bg-card);
   border-radius: 0.625rem;
   padding: 1.5rem;
   box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.08);
@@ -185,13 +165,13 @@ onMounted(async () => {
 .detail-name {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .detail-meta {
   margin-top: 0.25rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
   display: flex;
   gap: 0.5rem;
 }
@@ -209,13 +189,13 @@ onMounted(async () => {
 
 .detail-desc {
   margin-top: 0.75rem;
-  color: #374151;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
 .detail-contact {
   margin-top: 0.375rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 0.8125rem;
 }
 
@@ -226,8 +206,8 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background: #ffffff;
-  border: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-card);
+  border: 0.0625rem solid var(--color-border);
   border-radius: 0.5rem;
   padding: 0.875rem 1.25rem;
   display: flex;
@@ -239,12 +219,12 @@ onMounted(async () => {
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a56db;
+  color: var(--color-primary);
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .section {
@@ -257,13 +237,13 @@ onMounted(async () => {
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text);
   margin: 0 0 0.25rem 0;
 }
 
 .item-card {
-  background: #ffffff;
-  border: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-card);
+  border: 0.0625rem solid var(--color-border);
   border-radius: 0.5rem;
   padding: 0.875rem 1rem;
 }
@@ -278,7 +258,7 @@ onMounted(async () => {
 .item-author {
   font-weight: 600;
   font-size: 0.875rem;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .item-rating {
@@ -288,13 +268,13 @@ onMounted(async () => {
 
 .item-date {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--color-text-meta);
   margin-left: auto;
 }
 
 .item-body {
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 
@@ -306,10 +286,6 @@ onMounted(async () => {
   font-size: 0.75rem;
   font-weight: 600;
 }
-
-.badge-positive { background: #dcfce7; color: #166534; }
-.badge-violation { background: #fef2f2; color: #991b1b; }
-.badge-info { background: #dbeafe; color: #1e40af; }
 
 .btn {
   display: inline-flex;
@@ -325,18 +301,15 @@ onMounted(async () => {
 }
 
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-primary { background: #1a56db; color: #ffffff; }
-.btn-primary:hover:not(:disabled) { background: #1e40af; }
-.btn-secondary { background: #e5e7eb; color: #374151; }
-.btn-secondary:hover:not(:disabled) { background: #d1d5db; }
+.btn-primary { background: var(--color-primary); color: var(--color-bg-card); }
+.btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn-secondary { background: var(--color-border); color: var(--color-text-secondary); }
+.btn-secondary:hover:not(:disabled) { background: var(--color-border-input); }
 .btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
-.btn-ghost { background: transparent; color: #6b7280; }
-.btn-ghost:hover { background: #f3f4f6; color: #374151; }
-.btn-danger { color: #dc2626; }
-.btn-danger:hover { background: #fef2f2; color: #b91c1c; }
-
-.state-message { padding: 2rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
-.state-error { color: #dc2626; }
+.btn-ghost { background: transparent; color: var(--color-text-muted); }
+.btn-ghost:hover { background: var(--color-bg); color: var(--color-text-secondary); }
+.btn-danger { color: var(--color-danger); }
+.btn-danger:hover { background: var(--color-badge-violation-bg); color: var(--color-danger-hover); }
 
 @container (max-width: 40rem) {
   .detail-header {

@@ -1,77 +1,30 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useEmployeeStore } from '@/stores/employees'
-import type { Employee, EmployeeCreate } from '@/types/api'
-import { errorMessage } from '@/api/client'
+import type { EmployeeCreate } from '@/types/api'
+import { useEntityForm } from '@/composables/useEntityForm'
+import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
+import Modal from '@/components/Modal.vue'
+import BaseButton from '@/components/BaseButton.vue'
 
 const store = useEmployeeStore()
 
-const showForm = ref(false)
-const editingId = ref<number | null>(null)
-const formLoading = ref(false)
-const formError = ref('')
-
-const form = ref<EmployeeCreate>({
-  name: '',
-  email: '',
-  position: '',
+const { showForm, editingId, formData, formError, formLoading, openCreate, openEdit, closeForm, submitForm } = useEntityForm({
+  entityName: 'Сотрудник',
+  defaultCreateValues: { name: '', email: '', position: '' },
+  toCreateData: (emp: any) => ({ name: emp.name, email: emp.email, position: emp.position || '' }),
+  onSubmit: async ({ isEdit, id, values }: { isEdit: boolean; id: number | null; values: EmployeeCreate }) => {
+    if (isEdit && id) await store.update(id, values)
+    else await store.create(values)
+  },
+  validate: () => {
+    if (!formData.value.name.trim()) { formError.value = 'Имя обязательно'; return false }
+    if (!formData.value.email.trim()) { formError.value = 'Email обязателен'; return false }
+    return true
+  },
 })
 
-function openCreate() {
-  editingId.value = null
-  form.value = { name: '', email: '', position: '' }
-  formError.value = ''
-  showForm.value = true
-}
-
-function openEdit(emp: Employee) {
-  editingId.value = emp.id
-  form.value = {
-    name: emp.name,
-    email: emp.email,
-    position: emp.position || '',
-  }
-  formError.value = ''
-  showForm.value = true
-}
-
-function closeForm() {
-  showForm.value = false
-}
-
-async function submitForm() {
-  if (!form.value.name.trim()) {
-    formError.value = 'Имя обязательно'
-    return
-  }
-  if (!form.value.email.trim()) {
-    formError.value = 'Email обязателен'
-    return
-  }
-  formLoading.value = true
-  formError.value = ''
-  try {
-    if (editingId.value) {
-      await store.update(editingId.value, form.value)
-    } else {
-      await store.create(form.value)
-    }
-    showForm.value = false
-  } catch (e: unknown) {
-    formError.value = errorMessage(e, 'Ошибка сохранения')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-async function deleteItem(id: number) {
-  if (!confirm('Удалить сотрудника?')) return
-  try {
-    await store.remove(id)
-  } catch (e: unknown) {
-    alert(errorMessage(e, 'Ошибка удаления'))
-  }
-}
+const { deleteItem } = useDeleteConfirm((id: number) => store.remove(id), 'сотрудника')
 
 onMounted(() => {
   store.fetchAll()
@@ -111,32 +64,29 @@ onMounted(() => {
       </tbody>
     </table>
 
-    <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
-      <div class="modal">
-        <h3 class="modal-title">{{ editingId ? 'Изменить сотрудника' : 'Новый сотрудник' }}</h3>
-        <form @submit.prevent="submitForm" class="form">
-          <label class="field">
-            <span class="field-label">Имя *</span>
-            <input v-model="form.name" class="input" required />
-          </label>
-          <label class="field">
-            <span class="field-label">Email *</span>
-            <input v-model="form.email" type="email" class="input" required />
-          </label>
-          <label class="field">
-            <span class="field-label">Должность</span>
-            <input v-model="form.position" class="input" />
-          </label>
-          <div v-if="formError" class="form-error">{{ formError }}</div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary" @click="closeForm">Отмена</button>
-            <button type="submit" class="btn btn-primary" :disabled="formLoading">
-              {{ formLoading ? 'Сохранение...' : 'Сохранить' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal v-model="showForm" :title="editingId ? 'Изменить сотрудника' : 'Новый сотрудник'">
+      <form @submit.prevent="submitForm" class="form">
+        <label class="field">
+          <span class="field-label">Имя *</span>
+          <input v-model="formData.name" class="input" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Email *</span>
+          <input v-model="formData.email" type="email" class="input" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Должность</span>
+          <input v-model="formData.position" class="input" />
+        </label>
+        <div v-if="formError" class="form-error">{{ formError }}</div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" @click="closeForm">Отмена</button>
+          <button type="submit" class="btn btn-primary" :disabled="formLoading">
+            {{ formLoading ? 'Сохранение...' : 'Сохранить' }}
+          </button>
+        </div>
+      </form>
+    </Modal>
   </div>
 </template>
 
@@ -156,13 +106,13 @@ onMounted(() => {
 .view-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #ffffff;
+  background: var(--color-bg-card);
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.08);
@@ -173,48 +123,22 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #f9fafb;
-  border-bottom: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-subtle);
+  border-bottom: 0.0625rem solid var(--color-border);
 }
 
 .table td {
   padding: 0.75rem 1rem;
-  border-bottom: 0.0625rem solid #f3f4f6;
-  color: #374151;
+  border-bottom: 0.0625rem solid var(--color-bg);
+  color: var(--color-text-secondary);
 }
 
 .cell-name {
   font-weight: 500;
-  color: #1a56db;
-}
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.modal {
-  background: #ffffff;
-  border-radius: 0.75rem;
-  padding: 1.75rem;
-  width: 30rem;
-  max-width: 90vw;
-  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.15);
-}
-
-.modal-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1.25rem;
-  color: #111827;
+  color: var(--color-primary);
 }
 
 .form {
@@ -232,46 +156,34 @@ onMounted(() => {
 .field-label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .input {
   padding: 0.5rem 0.75rem;
-  border: 0.0625rem solid #d1d5db;
+  border: 0.0625rem solid var(--color-border-input);
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  color: #111827;
-  background: #ffffff;
+  color: var(--color-text);
+  background: var(--color-bg-card);
   outline: none;
   transition: border-color 0.15s;
 }
 
 .input:focus {
-  border-color: #1a56db;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1);
-}
-
-.form-error {
-  color: #dc2626;
-  font-size: 0.8125rem;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
 }
 
 .state-message {
   padding: 2.5rem 0;
   text-align: center;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 0.9375rem;
 }
 
 .state-error {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .btn {
@@ -293,21 +205,21 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #1a56db;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-bg-card);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1e40af;
+  background: var(--color-primary-hover);
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d1d5db;
+  background: var(--color-border-input);
 }
 
 .btn-sm {
@@ -317,21 +229,21 @@ onMounted(() => {
 
 .btn-ghost {
   background: transparent;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .btn-ghost:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
 }
 
 .btn-danger {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .btn-danger:hover {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--color-badge-violation-bg);
+  color: var(--color-danger-hover);
 }
 
 @container (max-width: 40rem) {
@@ -353,7 +265,7 @@ onMounted(() => {
 
   .table tr {
     padding: 0.875rem 1rem;
-    border-bottom: 0.0625rem solid #e5e7eb;
+    border-bottom: 0.0625rem solid var(--color-border);
   }
 
   .table tr:last-child {
@@ -368,7 +280,7 @@ onMounted(() => {
   .table td:first-child {
     font-weight: 600;
     font-size: 0.9375rem;
-    color: #1a56db;
+    color: var(--color-primary);
   }
 
   .table td:not(:first-child):not(:last-child)::before {
@@ -377,7 +289,7 @@ onMounted(() => {
     width: 6.875rem;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     flex-shrink: 0;
@@ -385,19 +297,6 @@ onMounted(() => {
 
   .table td:last-child {
     padding-top: 0.5rem;
-  }
-
-  .modal-overlay {
-    align-items: flex-end;
-  }
-
-  .modal {
-    width: 100%;
-    max-width: 100vw;
-    border-radius: 0.75rem 0.75rem 0 0;
-    padding: 1.5rem 1rem;
-    max-height: 90vh;
-    overflow-y: auto;
   }
 }
 </style>

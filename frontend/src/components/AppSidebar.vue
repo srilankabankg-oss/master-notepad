@@ -69,7 +69,7 @@ function isActive(name: string) {
 .sidebar {
   width: 15rem;
   min-height: 100vh;
-  background: #1e293b;
+  background: var(--color-sidebar);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -80,20 +80,20 @@ function isActive(name: string) {
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 1.25rem 1.5rem;
-  border-bottom: 0.0625rem solid #334155;
+  border-bottom: 0.0625rem solid var(--color-sidebar-hover);
 }
 
 .brand-icon {
   width: 1.75rem;
   height: 1.75rem;
-  color: #60a5fa;
+  color: var(--color-brand);
   flex-shrink: 0;
 }
 
 .brand-text {
   font-size: 1rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--color-sidebar-text-active);
   white-space: nowrap;
 }
 
@@ -108,7 +108,7 @@ function isActive(name: string) {
   display: block;
   padding: 0.625rem 1rem;
   border-radius: 0.5rem;
-  color: #cbd5e1;
+  color: var(--color-sidebar-text);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -116,13 +116,13 @@ function isActive(name: string) {
 }
 
 .nav-item:hover {
-  background: #334155;
-  color: #f1f5f9;
+  background: var(--color-sidebar-hover);
+  color: var(--color-sidebar-text-active);
 }
 
 .nav-item.active {
-  background: #1a56db;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-bg-card);
 }
 
 .hamburger {
@@ -136,7 +136,7 @@ function isActive(name: string) {
   padding: 0.5rem;
   border: none;
   border-radius: 0.375rem;
-  background: #1e293b;
+  background: var(--color-sidebar);
   cursor: pointer;
 }
 
@@ -144,13 +144,13 @@ function isActive(name: string) {
   display: block;
   width: 1.25rem;
   height: 0.125rem;
-  background: #cbd5e1;
+  background: var(--color-sidebar-text);
   border-radius: 0.0625rem;
   transition: background 0.15s;
 }
 
 .hamburger:hover .hamburger-line {
-  background: #f1f5f9;
+  background: var(--color-sidebar-text-active);
 }
 
 .sidebar-backdrop {

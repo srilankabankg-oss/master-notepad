@@ -30,8 +30,8 @@ const pageTitle = computed(() => {
   padding: 0 2rem;
   display: flex;
   align-items: center;
-  border-bottom: 0.0625rem solid #e5e7eb;
-  background: #ffffff;
+  border-bottom: 0.0625rem solid var(--color-border);
+  background: var(--color-bg-card);
 }
 
 @media (max-width: 767px) {
@@ -43,7 +43,7 @@ const pageTitle = computed(() => {
 .app-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text);
   margin: 0;
 }
 </style>

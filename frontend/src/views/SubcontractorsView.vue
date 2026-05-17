@@ -1,86 +1,33 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSubcontractorStore } from '@/stores/subcontractors'
 import type { SubcontractorCreate } from '@/types/api'
-import { errorMessage } from '@/api/client'
+import { useEntityForm } from '@/composables/useEntityForm'
+import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
+import { ratingColor } from '@/composables/useRating'
+import BaseButton from '@/components/BaseButton.vue'
+import RatingBadge from '@/components/RatingBadge.vue'
+import Modal from '@/components/Modal.vue'
 
 const router = useRouter()
 const store = useSubcontractorStore()
 
-const showForm = ref(false)
-const editingId = ref<number | null>(null)
-const formLoading = ref(false)
-const formError = ref('')
-
-const form = ref<SubcontractorCreate>({
-  name: '',
-  companyName: '',
-  specialization: '',
-  contactInfo: '',
-  description: '',
+const { showForm, editingId, formData, formError, formLoading, openCreate, openEdit, closeForm, submitForm } = useEntityForm({
+  entityName: 'Подрядчик',
+  defaultCreateValues: { name: '', companyName: '', specialization: '', contactInfo: '', description: '' },
+  toCreateData: (sub: any) => ({ name: sub.name, companyName: sub.companyName || '', specialization: sub.specialization || '', contactInfo: sub.contactInfo || '', description: sub.description || '' }),
+  onSubmit: async ({ isEdit, id, values }: { isEdit: boolean; id: number | null; values: SubcontractorCreate }) => {
+    if (isEdit && id) await store.update(id, values)
+    else await store.create(values)
+  },
+  validate: () => {
+    if (!formData.value.name.trim()) { formError.value = 'Название обязательно'; return false }
+    return true
+  },
 })
 
-function openCreate() {
-  editingId.value = null
-  form.value = { name: '', companyName: '', specialization: '', contactInfo: '', description: '' }
-  formError.value = ''
-  showForm.value = true
-}
-
-function openEdit(sub: any) {
-  editingId.value = sub.id
-  form.value = {
-    name: sub.name,
-    companyName: sub.companyName || '',
-    specialization: sub.specialization || '',
-    contactInfo: sub.contactInfo || '',
-    description: sub.description || '',
-  }
-  formError.value = ''
-  showForm.value = true
-}
-
-function closeForm() {
-  showForm.value = false
-}
-
-async function submitForm() {
-  if (!form.value.name.trim()) {
-    formError.value = 'Название обязательно'
-    return
-  }
-  formLoading.value = true
-  formError.value = ''
-  try {
-    if (editingId.value) {
-      await store.update(editingId.value, form.value)
-    } else {
-      await store.create(form.value)
-    }
-    showForm.value = false
-  } catch (e: unknown) {
-    formError.value = errorMessage(e, 'Ошибка сохранения')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-async function deleteItem(id: number) {
-  if (!confirm('Удалить подрядчика?')) return
-  try {
-    await store.remove(id)
-  } catch (e: unknown) {
-    alert(errorMessage(e, 'Ошибка удаления'))
-  }
-}
-
-function ratingColor(rating: number | undefined): string {
-  if (!rating) return '#9ca3af'
-  if (rating >= 7) return '#16a34a'
-  if (rating >= 5) return '#ca8a04'
-  return '#dc2626'
-}
+const { deleteItem } = useDeleteConfirm((id: number) => store.remove(id), 'подрядчик')
 
 onMounted(() => {
   store.fetchAll()
@@ -91,7 +38,7 @@ onMounted(() => {
   <div class="view">
     <div class="view-header">
       <h2 class="view-title">Список подрядчиков</h2>
-      <button class="btn btn-primary" @click="openCreate">Добавить подрядчика</button>
+      <BaseButton variant="primary" @click="openCreate">Добавить подрядчика</BaseButton>
     </div>
 
     <div v-if="store.loading" class="state-message">Загрузка...</div>
@@ -119,52 +66,30 @@ onMounted(() => {
           <td data-label="Компания">{{ sub.companyName || '-' }}</td>
           <td data-label="Специализация">{{ sub.specialization || '-' }}</td>
           <td data-label="Рейтинг">
-            <span class="rating-badge" :style="{ background: ratingColor(sub.rating) }">
-              {{ sub.rating ?? '-' }}
-            </span>
+            <RatingBadge :rating="sub.rating" />
           </td>
           <td @click.stop>
-            <button class="btn btn-sm btn-ghost" @click="openEdit(sub)">Изменить</button>
-            <button class="btn btn-sm btn-ghost btn-danger" @click="deleteItem(sub.id)">Удалить</button>
+            <BaseButton size="sm" variant="ghost" @click="openEdit(sub)">Изменить</BaseButton>
+            <BaseButton size="sm" variant="ghost" @click="deleteItem(sub.id)" class="btn-danger-text">Удалить</BaseButton>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
-      <div class="modal">
-        <h3 class="modal-title">{{ editingId ? 'Изменить подрядчика' : 'Новый подрядчик' }}</h3>
-        <form @submit.prevent="submitForm" class="form">
-          <label class="field">
-            <span class="field-label">Название *</span>
-            <input v-model="form.name" class="input" required />
-          </label>
-          <label class="field">
-            <span class="field-label">Компания</span>
-            <input v-model="form.companyName" class="input" />
-          </label>
-          <label class="field">
-            <span class="field-label">Специализация</span>
-            <input v-model="form.specialization" class="input" />
-          </label>
-          <label class="field">
-            <span class="field-label">Контактная информация</span>
-            <input v-model="form.contactInfo" class="input" />
-          </label>
-          <label class="field">
-            <span class="field-label">Описание</span>
-            <textarea v-model="form.description" class="input textarea" rows="3" />
-          </label>
-          <div v-if="formError" class="form-error">{{ formError }}</div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary" @click="closeForm">Отмена</button>
-            <button type="submit" class="btn btn-primary" :disabled="formLoading">
-              {{ formLoading ? 'Сохранение...' : 'Сохранить' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal v-model="showForm" :title="editingId ? 'Изменить подрядчика' : 'Новый подрядчик'">
+      <form @submit.prevent="submitForm" class="form">
+        <label class="field"><span class="field-label">Название *</span><input v-model="formData.name" class="input" required /></label>
+        <label class="field"><span class="field-label">Компания</span><input v-model="formData.companyName" class="input" /></label>
+        <label class="field"><span class="field-label">Специализация</span><input v-model="formData.specialization" class="input" /></label>
+        <label class="field"><span class="field-label">Контактная информация</span><input v-model="formData.contactInfo" class="input" /></label>
+        <label class="field"><span class="field-label">Описание</span><textarea v-model="formData.description" class="input textarea" rows="3" /></label>
+        <div v-if="formError" class="form-error">{{ formError }}</div>
+        <div class="form-actions">
+          <BaseButton variant="secondary" type="button" @click="closeForm">Отмена</BaseButton>
+          <BaseButton variant="primary" type="submit" :disabled="formLoading">{{ formLoading ? 'Сохранение...' : 'Сохранить' }}</BaseButton>
+        </div>
+      </form>
+    </Modal>
   </div>
 </template>
 
@@ -184,13 +109,13 @@ onMounted(() => {
 .view-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #ffffff;
+  background: var(--color-bg-card);
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.08);
@@ -201,17 +126,17 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #f9fafb;
-  border-bottom: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-subtle);
+  border-bottom: 0.0625rem solid var(--color-border);
 }
 
 .table td {
   padding: 0.75rem 1rem;
-  border-bottom: 0.0625rem solid #f3f4f6;
-  color: #374151;
+  border-bottom: 0.0625rem solid var(--color-bg);
+  color: var(--color-text-secondary);
 }
 
 .table-row-clickable {
@@ -220,24 +145,12 @@ onMounted(() => {
 }
 
 .table-row-clickable:hover {
-  background: #f9fafb;
+  background: var(--color-bg-subtle);
 }
 
 .cell-name {
   font-weight: 500;
-  color: #1a56db;
-}
-
-.rating-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.25rem;
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.375rem;
-  color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: var(--color-primary);
 }
 
 .modal-overlay {
@@ -251,7 +164,7 @@ onMounted(() => {
 }
 
 .modal {
-  background: #ffffff;
+  background: var(--color-bg-card);
   border-radius: 0.75rem;
   padding: 1.75rem;
   width: 30rem;
@@ -263,7 +176,7 @@ onMounted(() => {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 1.25rem;
-  color: #111827;
+  color: var(--color-text);
 }
 
 .form {
@@ -281,22 +194,22 @@ onMounted(() => {
 .field-label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .input {
   padding: 0.5rem 0.75rem;
-  border: 0.0625rem solid #d1d5db;
+  border: 0.0625rem solid var(--color-border-input);
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  color: #111827;
-  background: #ffffff;
+  color: var(--color-text);
+  background: var(--color-bg-card);
   outline: none;
   transition: border-color 0.15s;
 }
 
 .input:focus {
-  border-color: #1a56db;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1);
 }
 
@@ -306,7 +219,7 @@ onMounted(() => {
 }
 
 .form-error {
-  color: #dc2626;
+  color: var(--color-danger);
   font-size: 0.8125rem;
 }
 
@@ -320,12 +233,12 @@ onMounted(() => {
 .state-message {
   padding: 2.5rem 0;
   text-align: center;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 0.9375rem;
 }
 
 .state-error {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .btn {
@@ -347,21 +260,21 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #1a56db;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-bg-card);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1e40af;
+  background: var(--color-primary-hover);
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d1d5db;
+  background: var(--color-border-input);
 }
 
 .btn-sm {
@@ -371,21 +284,21 @@ onMounted(() => {
 
 .btn-ghost {
   background: transparent;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .btn-ghost:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
 }
 
 .btn-danger {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .btn-danger:hover {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--color-badge-violation-bg);
+  color: var(--color-danger-hover);
 }
 
 @container (max-width: 40rem) {
@@ -407,7 +320,7 @@ onMounted(() => {
 
   .table tr {
     padding: 0.875rem 1rem;
-    border-bottom: 0.0625rem solid #e5e7eb;
+    border-bottom: 0.0625rem solid var(--color-border);
   }
 
   .table tr:last-child {
@@ -422,7 +335,7 @@ onMounted(() => {
   .table td:first-child {
     font-weight: 600;
     font-size: 0.9375rem;
-    color: #1a56db;
+    color: var(--color-primary);
   }
 
   .table td:not(:first-child):not(:last-child)::before {
@@ -431,7 +344,7 @@ onMounted(() => {
     width: 6.875rem;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     flex-shrink: 0;

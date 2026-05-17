@@ -3,6 +3,9 @@ import { onMounted, ref, watch } from 'vue'
 import { useSuggestionStore } from '@/stores/suggestions'
 import { useEmployeeStore } from '@/stores/employees'
 import type { SuggestionStatus } from '@/types/api'
+import { useEmployeeName } from '@/composables/useEntityName'
+import { statusLabel } from '@/composables/useStatusLabel'
+import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
 import { errorMessage } from '@/api/client'
 
 const suggestionStore = useSuggestionStore()
@@ -10,6 +13,7 @@ const employeeStore = useEmployeeStore()
 
 const filterChecklistId = ref<number | undefined>(undefined)
 const filterInput = ref('')
+const getEmployeeName = useEmployeeName(employeeStore.items)
 
 function applyFilter() {
   const val = filterInput.value.trim()
@@ -21,18 +25,7 @@ function clearFilter() {
   filterChecklistId.value = undefined
 }
 
-function getEmployeeName(id: number): string {
-  return employeeStore.items.find((e) => e.id === id)?.name || (id != null ? `#${id}` : '—')
-}
-
-function statusLabel(status: SuggestionStatus): string {
-  const map: Record<SuggestionStatus, string> = {
-    pending: 'На рассмотрении',
-    approved: 'Одобрено',
-    rejected: 'Отклонено',
-  }
-  return map[status]
-}
+const { deleteItem } = useDeleteConfirm((id: number) => suggestionStore.remove(id), 'предложение')
 
 async function approve(id: number) {
   try {
@@ -45,15 +38,6 @@ async function approve(id: number) {
 async function reject(id: number) {
   try {
     await suggestionStore.update(id, { status: 'rejected' })
-  } catch (e: unknown) {
-    alert(errorMessage(e, 'Ошибка'))
-  }
-}
-
-async function deleteSuggestion(id: number) {
-  if (!confirm('Удалить предложение?')) return
-  try {
-    await suggestionStore.remove(id)
   } catch (e: unknown) {
     alert(errorMessage(e, 'Ошибка'))
   }
@@ -135,7 +119,7 @@ onMounted(async () => {
               </button>
               <button
                 class="btn btn-sm btn-ghost btn-danger"
-                @click="deleteSuggestion(s.id)"
+                @click="deleteItem(s.id)"
               >
                 Удалить
               </button>
@@ -155,7 +139,7 @@ onMounted(async () => {
   margin-bottom: 1.25rem;
 }
 
-.view-title { font-size: 1.125rem; font-weight: 600; color: #111827; }
+.view-title { font-size: 1.125rem; font-weight: 600; color: var(--color-text); }
 
 .filter-bar {
   display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.125rem;
@@ -163,13 +147,13 @@ onMounted(async () => {
 
 .filter-label {
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.875rem; font-weight: 500; color: #374151;
+  font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary);
 }
 
 .filter-input { width: 10rem; }
 
 .table-wrap {
-  background: #ffffff; border: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-card); border: 0.0625rem solid var(--color-border);
   border-radius: 0.5rem; overflow: hidden;
 }
 
@@ -180,22 +164,22 @@ onMounted(async () => {
 
 .suggestions-table th {
   text-align: left; padding: 0.75rem 1rem;
-  font-size: 0.75rem; font-weight: 600; color: #6b7280;
-  text-transform: uppercase; letter-spacing: 0.0.3125rem;
-  background: #f9fafb; border-bottom: 0.0625rem solid #e5e7eb;
+  font-size: 0.75rem; font-weight: 600; color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  background: var(--color-bg-subtle); border-bottom: 0.0625rem solid var(--color-border);
 }
 
 .suggestions-table td {
-  padding: 0.75rem 1rem; color: #374151;
-  border-bottom: 0.0625rem solid #f3f4f6; vertical-align: middle;
+  padding: 0.75rem 1rem; color: var(--color-text-secondary);
+  border-bottom: 0.0625rem solid var(--color-bg); vertical-align: middle;
 }
 
 .suggestions-table tr:last-child td { border-bottom: none; }
 
-.suggestions-table tbody tr:hover { background: #f9fafb; }
+.suggestions-table tbody tr:hover { background: var(--color-bg-subtle); }
 
 .cell-id {
-  font-size: 0.75rem; color: #9ca3af; font-family: monospace; white-space: nowrap;
+  font-size: 0.75rem; color: var(--color-text-meta); font-family: monospace; white-space: nowrap;
 }
 
 .cell-text {
@@ -212,9 +196,9 @@ onMounted(async () => {
   font-size: 0.75rem; font-weight: 600; white-space: nowrap;
 }
 
-.status-pending   { background: #fef9c3; color: #a16207; }
-.status-approved  { background: #dcfce7; color: #16a34a; }
-.status-rejected  { background: #fee2e2; color: #dc2626; }
+.status-pending   { background: var(--color-badge-warning-bg); color: var(--color-warning-hover); }
+.status-approved  { background: var(--color-badge-positive-bg); color: var(--color-success); }
+.status-rejected  { background: var(--color-badge-rejected-bg); color: var(--color-danger); }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -223,35 +207,25 @@ onMounted(async () => {
 }
 
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-primary { background: #1a56db; color: #ffffff; }
-.btn-primary:hover:not(:disabled) { background: #1e40af; }
-.btn-secondary { background: #e5e7eb; color: #374151; }
-.btn-secondary:hover:not(:disabled) { background: #d1d5db; }
+.btn-primary { background: var(--color-primary); color: var(--color-bg-card); }
+.btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn-secondary { background: var(--color-border); color: var(--color-text-secondary); }
+.btn-secondary:hover:not(:disabled) { background: var(--color-border-input); }
 .btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
-.btn-ghost { background: transparent; color: #6b7280; }
-.btn-ghost:hover { background: #f3f4f6; color: #374151; }
-.btn-danger { color: #dc2626; }
-.btn-danger:hover { background: #fef2f2; color: #b91c1c; }
+.btn-ghost { background: transparent; color: var(--color-text-muted); }
+.btn-ghost:hover { background: var(--color-bg); color: var(--color-text-secondary); }
+.btn-danger { color: var(--color-danger); }
+.btn-danger:hover { background: var(--color-badge-violation-bg); color: var(--color-danger-hover); }
 
-.btn-success {
-  background: #16a34a; color: #ffffff;
-}
-.btn-success:hover { background: #15803d; }
-
-.btn-warning {
-  background: #ca8a04; color: #ffffff;
-}
-.btn-warning:hover { background: #a16207; }
-
-.state-message { padding: 2.5rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
-.state-error { color: #dc2626; }
+.state-message { padding: 2.5rem 0; text-align: center; color: var(--color-text-muted); font-size: 0.9375rem; }
+.state-error { color: var(--color-danger); }
 
 .input {
-  padding: 0.5rem 0.75rem; border: 0.0625rem solid #d1d5db; border-radius: 0.375rem;
-  font-size: 0.875rem; color: #111827; background: #ffffff; outline: none;
+  padding: 0.5rem 0.75rem; border: 0.0625rem solid var(--color-border-input); border-radius: 0.375rem;
+  font-size: 0.875rem; color: var(--color-text); background: var(--color-bg-card); outline: none;
 }
 
-.input:focus { border-color: #1a56db; box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
+.input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
 
 @container (max-width: 40rem) {
   .view-header {
@@ -276,7 +250,7 @@ onMounted(async () => {
 
   .suggestions-table tr {
     padding: 0.875rem 1rem;
-    border-bottom: 0.0625rem solid #e5e7eb;
+    border-bottom: 0.0625rem solid var(--color-border);
   }
 
   .suggestions-table tr:last-child {
@@ -299,7 +273,7 @@ onMounted(async () => {
     width: 6.25rem;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     flex-shrink: 0;

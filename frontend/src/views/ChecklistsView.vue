@@ -4,6 +4,8 @@ import { useChecklistStore } from '@/stores/checklists'
 import { useEmployeeStore } from '@/stores/employees'
 import { api, errorMessage } from '@/api/client'
 import type { Checklist, ChecklistCreate, ChecklistType } from '@/types/api'
+import { useEmployeeName } from '@/composables/useEntityName'
+import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
 
 const checklistStore = useChecklistStore()
 const employeeStore = useEmployeeStore()
@@ -23,6 +25,10 @@ const suggestChecklistId = ref(0)
 const suggestText = ref('')
 const suggestError = ref('')
 const suggestLoading = ref(false)
+
+const getEmployeeName = useEmployeeName(employeeStore.items)
+
+const { deleteItem } = useDeleteConfirm((id: number) => checklistStore.remove(id), 'чек-лист')
 
 async function loadData() {
   await checklistStore.fetchAll(activeType.value, ownerId.value)
@@ -85,15 +91,6 @@ async function toggleItem(checklistId: number, items: { text: string; completed:
   }
 }
 
-async function deleteChecklist(id: number) {
-  if (!confirm('Удалить чек-лист?')) return
-  try {
-    await checklistStore.remove(id)
-  } catch (e: unknown) {
-    alert(errorMessage(e, 'Ошибка'))
-  }
-}
-
 function openSuggest(checklistId: number) {
   suggestChecklistId.value = checklistId
   suggestText.value = ''
@@ -121,11 +118,6 @@ async function submitSuggestion() {
 
 function completedCount(items: { text: string; completed: boolean }[]): number {
   return items.filter((i) => i.completed).length
-}
-
-function getEmployeeName(id: number | null): string {
-  if (!id) return '-'
-  return employeeStore.items.find((e) => e.id === id)?.name || (id != null ? `#${id}` : '—')
 }
 
 watch(activeType, () => loadData())
@@ -187,7 +179,7 @@ onMounted(async () => {
         <div class="checklist-actions">
           <button class="btn btn-sm btn-ghost" @click="openEdit(cl)">Изменить</button>
           <button class="btn btn-sm btn-ghost" @click="openSuggest(cl.id)">Предложить улучшение</button>
-          <button class="btn btn-sm btn-ghost btn-danger" @click="deleteChecklist(cl.id)">Удалить</button>
+          <button class="btn btn-sm btn-ghost btn-danger" @click="deleteItem(cl.id)">Удалить</button>
         </div>
       </div>
     </div>
@@ -206,7 +198,7 @@ onMounted(async () => {
               <input v-model="item.text" class="input" :placeholder="`Пункт ${idx + 1}`" />
               <button type="button" class="btn btn-sm btn-ghost btn-danger" @click="removeFormItem(idx)" :disabled="formItems.length <= 1">×</button>
             </div>
-            <button type="button" class="btn btn-sm btn-ghost" @click="addFormItem" style="margin-top: 0.25rem">+ Добавить пункт</button>
+            <button type="button" class="btn btn-sm btn-ghost btn-add-item" @click="addFormItem">+ Добавить пункт</button>
           </div>
           <div v-if="formError" class="form-error">{{ formError }}</div>
           <div class="form-actions">
@@ -244,7 +236,7 @@ onMounted(async () => {
   margin-bottom: 1.25rem;
 }
 
-.view-title { font-size: 1.125rem; font-weight: 600; color: #111827; }
+.view-title { font-size: 1.125rem; font-weight: 600; color: var(--color-text); }
 
 .filter-bar {
   display: flex; gap: 1.25rem; margin-bottom: 1.125rem;
@@ -252,7 +244,7 @@ onMounted(async () => {
 
 .filter-label {
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.875rem; font-weight: 500; color: #374151;
+  font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary);
 }
 
 .filter-select { width: 13.75rem; }
@@ -260,7 +252,7 @@ onMounted(async () => {
 .checklist-list { display: flex; flex-direction: column; gap: 1rem; }
 
 .checklist-card {
-  background: #ffffff; border: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-card); border: 0.0625rem solid var(--color-border);
   border-radius: 0.5rem; padding: 1.25rem;
 }
 
@@ -269,23 +261,23 @@ onMounted(async () => {
   margin-bottom: 0.875rem;
 }
 
-.checklist-title { font-size: 1rem; font-weight: 600; color: #111827; margin: 0 0 0.125rem; }
-.checklist-meta { font-size: 0.75rem; color: #9ca3af; }
-.checklist-progress { font-size: 0.875rem; font-weight: 600; color: #1a56db; white-space: nowrap; }
+.checklist-title { font-size: 1rem; font-weight: 600; color: var(--color-text); margin: 0 0 0.125rem; }
+.checklist-meta { font-size: 0.75rem; color: var(--color-text-meta); }
+.checklist-progress { font-size: 0.875rem; font-weight: 600; color: var(--color-primary); white-space: nowrap; }
 
 .checklist-items { list-style: none; display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 0.75rem; }
 
 .checklist-label {
   display: flex; align-items: center; gap: 0.625rem;
-  font-size: 0.875rem; color: #374151; cursor: pointer;
+  font-size: 0.875rem; color: var(--color-text-secondary); cursor: pointer;
 }
 
 .checklist-label input[type="checkbox"] {
-  width: 1rem; height: 1rem; accent-color: #1a56db; cursor: pointer; flex-shrink: 0;
+  width: 1rem; height: 1rem; accent-color: var(--color-primary); cursor: pointer; flex-shrink: 0;
 }
 
 .checklist-item.completed .checklist-label span {
-  text-decoration: line-through; color: #9ca3af;
+  text-decoration: line-through; color: var(--color-text-meta);
 }
 
 .checklist-actions { display: flex; gap: 0.25rem; }
@@ -301,30 +293,30 @@ onMounted(async () => {
 }
 
 .modal {
-  background: #ffffff; border-radius: 0.75rem;
+  background: var(--color-bg-card); border-radius: 0.75rem;
   padding: 1.75rem; width: 33.75rem; max-width: 90vw;
   box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.15);
 }
 
-.modal-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; color: #111827; }
+.modal-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--color-text); }
 
 .form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.25rem; }
-.field-label { font-size: 0.8125rem; font-weight: 500; color: #374151; }
+.field-label { font-size: 0.8125rem; font-weight: 500; color: var(--color-text-secondary); }
 
 .input {
-  padding: 0.5rem 0.75rem; border: 0.0625rem solid #d1d5db; border-radius: 0.375rem;
-  font-size: 0.875rem; color: #111827; background: #ffffff; outline: none;
+  padding: 0.5rem 0.75rem; border: 0.0625rem solid var(--color-border-input); border-radius: 0.375rem;
+  font-size: 0.875rem; color: var(--color-text); background: var(--color-bg-card); outline: none;
 }
 
-.input:focus { border-color: #1a56db; box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
+.input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
 .textarea { resize: vertical; min-height: 3.75rem; }
 
-.form-error { color: #dc2626; font-size: 0.8125rem; }
+.form-error { color: var(--color-danger); font-size: 0.8125rem; }
 .form-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 
-.state-message { padding: 2.5rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
-.state-error { color: #dc2626; }
+.state-message { padding: 2.5rem 0; text-align: center; color: var(--color-text-muted); font-size: 0.9375rem; }
+.state-error { color: var(--color-danger); }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -333,15 +325,15 @@ onMounted(async () => {
 }
 
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-primary { background: #1a56db; color: #ffffff; }
-.btn-primary:hover:not(:disabled) { background: #1e40af; }
-.btn-secondary { background: #e5e7eb; color: #374151; }
-.btn-secondary:hover:not(:disabled) { background: #d1d5db; }
+.btn-primary { background: var(--color-primary); color: var(--color-bg-card); }
+.btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn-secondary { background: var(--color-border); color: var(--color-text-secondary); }
+.btn-secondary:hover:not(:disabled) { background: var(--color-border-input); }
 .btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
-.btn-ghost { background: transparent; color: #6b7280; }
-.btn-ghost:hover { background: #f3f4f6; color: #374151; }
-.btn-danger { color: #dc2626; }
-.btn-danger:hover { background: #fef2f2; color: #b91c1c; }
+.btn-ghost { background: transparent; color: var(--color-text-muted); }
+.btn-ghost:hover { background: var(--color-bg); color: var(--color-text-secondary); }
+.btn-danger { color: var(--color-danger); }
+.btn-danger:hover { background: var(--color-badge-violation-bg); color: var(--color-danger-hover); }
 
 @container (max-width: 40rem) {
   .view-header {

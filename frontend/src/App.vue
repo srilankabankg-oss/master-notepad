@@ -22,46 +22,6 @@ import AppHeader from '@/components/AppHeader.vue'
   --bp-lg: 64rem;
   --sidebar-width: 15rem;
 }
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  font-size: 100%;
-}
-
-html, body {
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #1f2937;
-  background: #f3f4f6;
-  -webkit-font-smoothing: antialiased;
-}
-
-#app {
-  height: 100%;
-}
-
-input, select, textarea, button {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-a {
-  color: #1a56db;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
 </style>
 
 <style scoped>

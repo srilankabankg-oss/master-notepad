@@ -2,8 +2,13 @@
 import { onMounted, ref, watch } from 'vue'
 import { useMeetingStore } from '@/stores/meetings'
 import { useSubcontractorStore } from '@/stores/subcontractors'
+import { useSubcontractorName } from '@/composables/useEntityName'
+import { formatDateTime } from '@/composables/useDateFormatter'
+import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
 import type { Meeting, MeetingCreate } from '@/types/api'
 import { errorMessage } from '@/api/client'
+import Modal from '@/components/Modal.vue'
+import BaseButton from '@/components/BaseButton.vue'
 
 const meetingStore = useMeetingStore()
 const subcontractorStore = useSubcontractorStore()
@@ -20,14 +25,9 @@ const attendeesText = ref('')
 const formError = ref('')
 const formLoading = ref(false)
 
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('ru-RU')
-}
+const getSubcontractorName = useSubcontractorName(subcontractorStore.items)
 
-function getSubcontractorName(id: number | null): string {
-  if (!id) return '-'
-  return subcontractorStore.items.find((s) => s.id === id)?.name || (id != null ? `#${id}` : '—')
-}
+const { deleteItem } = useDeleteConfirm((id: number) => meetingStore.remove(id), 'протокол')
 
 function openCreate() {
   editingId.value = null
@@ -81,11 +81,6 @@ async function submitForm() {
   }
 }
 
-async function deleteItem(id: number) {
-  if (!confirm('Удалить протокол?')) return
-  try { await meetingStore.remove(id) } catch (e: unknown) { alert(errorMessage(e, 'Ошибка')) }
-}
-
 async function loadData() {
   await meetingStore.fetchAll(filterSubId.value)
 }
@@ -101,7 +96,7 @@ onMounted(async () => {
   <div class="view">
     <div class="view-header">
       <h2 class="view-title">Протоколы встреч</h2>
-      <button class="btn btn-primary" @click="openCreate">Добавить протокол</button>
+      <BaseButton variant="primary" @click="openCreate">Добавить протокол</BaseButton>
     </div>
 
     <div class="filter-bar">
@@ -148,55 +143,52 @@ onMounted(async () => {
           </div>
         </div>
         <div class="meeting-actions">
-          <button class="btn btn-sm btn-ghost" @click="openEdit(m)">Изменить</button>
-          <button class="btn btn-sm btn-ghost btn-danger" @click="deleteItem(m.id)">Удалить</button>
+          <BaseButton variant="ghost" size="sm" @click="openEdit(m)">Изменить</BaseButton>
+          <BaseButton variant="danger" size="sm" @click="deleteItem(m.id)">Удалить</BaseButton>
         </div>
       </div>
     </div>
 
-    <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
-      <div class="modal">
-        <h3 class="modal-title">{{ editingId ? 'Изменить протокол' : 'Новый протокол' }}</h3>
-        <div class="form">
-          <label class="field">
-            <span class="field-label">Название *</span>
-            <input v-model="formData.title" class="input" />
-          </label>
-          <label class="field">
-            <span class="field-label">Дата</span>
-            <input type="datetime-local" v-model="formData.date" class="input" />
-          </label>
-          <label class="field">
-            <span class="field-label">Подрядчик</span>
-            <select v-model="formData.subcontractorId" class="input">
-              <option :value="null">Без подрядчика</option>
-              <option v-for="s in subcontractorStore.items" :key="s.id" :value="s.id">{{ s.name }}</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="field-label">Участники (через запятую)</span>
-            <input v-model="attendeesText" class="input" placeholder="Иван Иванов, Петр Петров" />
-          </label>
-          <label class="field">
-            <span class="field-label">Повестка *</span>
-            <textarea v-model="formData.agenda" class="input textarea" rows="3" />
-          </label>
-          <label class="field">
-            <span class="field-label">Решения</span>
-            <textarea v-model="formData.decisions" class="input textarea" rows="2" />
-          </label>
-          <label class="field">
-            <span class="field-label">Заметки</span>
-            <textarea v-model="formData.notes" class="input textarea" rows="2" />
-          </label>
-          <div v-if="formError" class="form-error">{{ formError }}</div>
-          <div class="form-actions">
-            <button class="btn btn-secondary" @click="closeForm">Отмена</button>
-            <button class="btn btn-primary" :disabled="formLoading" @click="submitForm">Сохранить</button>
-          </div>
+    <Modal v-model="showForm" :title="editingId ? 'Изменить протокол' : 'Новый протокол'">
+      <div class="form">
+        <label class="field">
+          <span class="field-label">Название *</span>
+          <input v-model="formData.title" class="input" />
+        </label>
+        <label class="field">
+          <span class="field-label">Дата</span>
+          <input type="datetime-local" v-model="formData.date" class="input" />
+        </label>
+        <label class="field">
+          <span class="field-label">Подрядчик</span>
+          <select v-model="formData.subcontractorId" class="input">
+            <option :value="null">Без подрядчика</option>
+            <option v-for="s in subcontractorStore.items" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Участники (через запятую)</span>
+          <input v-model="attendeesText" class="input" placeholder="Иван Иванов, Петр Петров" />
+        </label>
+        <label class="field">
+          <span class="field-label">Повестка *</span>
+          <textarea v-model="formData.agenda" class="input textarea" rows="3" />
+        </label>
+        <label class="field">
+          <span class="field-label">Решения</span>
+          <textarea v-model="formData.decisions" class="input textarea" rows="2" />
+        </label>
+        <label class="field">
+          <span class="field-label">Заметки</span>
+          <textarea v-model="formData.notes" class="input textarea" rows="2" />
+        </label>
+        <div v-if="formError" class="form-error">{{ formError }}</div>
+        <div class="form-actions">
+          <BaseButton variant="secondary" @click="closeForm">Отмена</BaseButton>
+          <BaseButton variant="primary" :disabled="formLoading" @click="submitForm">Сохранить</BaseButton>
         </div>
       </div>
-    </div>
+    </Modal>
   </div>
 </template>
 
@@ -208,13 +200,13 @@ onMounted(async () => {
   margin-bottom: 1.25rem;
 }
 
-.view-title { font-size: 1.125rem; font-weight: 600; color: #111827; }
+.view-title { font-size: 1.125rem; font-weight: 600; color: var(--color-text); }
 
 .filter-bar { margin-bottom: 1.125rem; }
 
 .filter-label {
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.875rem; font-weight: 500; color: #374151;
+  font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary);
 }
 
 .filter-select { width: 16.25rem; }
@@ -222,58 +214,43 @@ onMounted(async () => {
 .meeting-list { display: flex; flex-direction: column; gap: 0.875rem; }
 
 .meeting-card {
-  background: #ffffff; border: 0.0625rem solid #e5e7eb;
+  background: var(--color-bg-card); border: 0.0625rem solid var(--color-border);
   border-radius: 0.5rem; padding: 1.25rem;
 }
 
 .meeting-head { margin-bottom: 0.75rem; }
-.meeting-title { font-size: 1rem; font-weight: 600; color: #111827; margin: 0; }
-.meeting-meta { font-size: 0.75rem; color: #9ca3af; margin-top: 0.125rem; }
+.meeting-title { font-size: 1rem; font-weight: 600; color: var(--color-text); margin: 0; }
+.meeting-meta { font-size: 0.75rem; color: var(--color-text-meta); margin-top: 0.125rem; }
 
 .meeting-body { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
 
 .meeting-section strong {
-  font-size: 0.8125rem; font-weight: 600; color: #374151;
+  font-size: 0.8125rem; font-weight: 600; color: var(--color-text-secondary);
 }
 
 .meeting-section p {
-  font-size: 0.875rem; color: #4b5563; margin: 0.125rem 0 0; line-height: 1.5;
+  font-size: 0.875rem; color: var(--color-text-secondary); margin: 0.125rem 0 0; line-height: 1.5;
 }
 
 .meeting-actions { display: flex; gap: 0.25rem; }
 
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
-}
-
-.modal {
-  background: #ffffff; border-radius: 0.75rem;
-  padding: 1.75rem; width: 33.75rem; max-width: 90vw;
-  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.15);
-}
-
-.modal-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; color: #111827; }
-
 .form { display: flex; flex-direction: column; gap: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.25rem; }
-.field-label { font-size: 0.8125rem; font-weight: 500; color: #374151; }
+.field-label { font-size: 0.8125rem; font-weight: 500; color: var(--color-text-secondary); }
 
 .input {
-  padding: 0.5rem 0.75rem; border: 0.0625rem solid #d1d5db; border-radius: 0.375rem;
-  font-size: 0.875rem; color: #111827; background: #ffffff; outline: none;
+  padding: 0.5rem 0.75rem; border: 0.0625rem solid var(--color-border-input); border-radius: 0.375rem;
+  font-size: 0.875rem; color: var(--color-text); background: var(--color-bg-card); outline: none;
 }
 
-.input:focus { border-color: #1a56db; box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
+.input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
 .textarea { resize: vertical; min-height: 3.75rem; }
 
-.form-error { color: #dc2626; font-size: 0.8125rem; }
+.form-error { color: var(--color-danger); font-size: 0.8125rem; }
 .form-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 
-.state-message { padding: 2.5rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
-.state-error { color: #dc2626; }
+.state-message { padding: 2.5rem 0; text-align: center; color: var(--color-text-muted); font-size: 0.9375rem; }
+.state-error { color: var(--color-danger); }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -282,15 +259,15 @@ onMounted(async () => {
 }
 
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-primary { background: #1a56db; color: #ffffff; }
-.btn-primary:hover:not(:disabled) { background: #1e40af; }
-.btn-secondary { background: #e5e7eb; color: #374151; }
-.btn-secondary:hover:not(:disabled) { background: #d1d5db; }
+.btn-primary { background: var(--color-primary); color: var(--color-bg-card); }
+.btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn-secondary { background: var(--color-border); color: var(--color-text-secondary); }
+.btn-secondary:hover:not(:disabled) { background: var(--color-border-input); }
 .btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
-.btn-ghost { background: transparent; color: #6b7280; }
-.btn-ghost:hover { background: #f3f4f6; color: #374151; }
-.btn-danger { color: #dc2626; }
-.btn-danger:hover { background: #fef2f2; color: #b91c1c; }
+.btn-ghost { background: transparent; color: var(--color-text-muted); }
+.btn-ghost:hover { background: var(--color-bg); color: var(--color-text-secondary); }
+.btn-danger { color: var(--color-danger); }
+.btn-danger:hover { background: var(--color-badge-violation-bg); color: var(--color-danger-hover); }
 
 @container (max-width: 40rem) {
   .view-header {
@@ -313,19 +290,6 @@ onMounted(async () => {
 
   .meeting-card {
     padding: 1rem;
-  }
-
-  .modal-overlay {
-    align-items: flex-end;
-  }
-
-  .modal {
-    width: 100%;
-    max-width: 100vw;
-    border-radius: 0.75rem 0.75rem 0 0;
-    padding: 1.5rem 1rem;
-    max-height: 90vh;
-    overflow-y: auto;
   }
 }
 </style>
