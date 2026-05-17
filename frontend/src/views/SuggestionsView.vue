@@ -148,46 +148,46 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.view { max-width: 1000px; container-type: inline-size; }
+.view { max-width: 62.5rem; container-type: inline-size; }
 
 .view-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
-.view-title { font-size: 18px; font-weight: 600; color: #111827; }
+.view-title { font-size: 1.125rem; font-weight: 600; color: #111827; }
 
 .filter-bar {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.125rem;
 }
 
 .filter-label {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 500; color: #374151;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.875rem; font-weight: 500; color: #374151;
 }
 
-.filter-input { width: 160px; }
+.filter-input { width: 10rem; }
 
 .table-wrap {
-  background: #ffffff; border: 1px solid #e5e7eb;
-  border-radius: 8px; overflow: hidden;
+  background: #ffffff; border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.5rem; overflow: hidden;
 }
 
 .suggestions-table {
   width: 100%; border-collapse: collapse;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .suggestions-table th {
-  text-align: left; padding: 12px 16px;
-  font-size: 12px; font-weight: 600; color: #6b7280;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  background: #f9fafb; border-bottom: 1px solid #e5e7eb;
+  text-align: left; padding: 0.75rem 1rem;
+  font-size: 0.75rem; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: 0.0.3125rem;
+  background: #f9fafb; border-bottom: 0.0625rem solid #e5e7eb;
 }
 
 .suggestions-table td {
-  padding: 12px 16px; color: #374151;
-  border-bottom: 1px solid #f3f4f6; vertical-align: middle;
+  padding: 0.75rem 1rem; color: #374151;
+  border-bottom: 0.0625rem solid #f3f4f6; vertical-align: middle;
 }
 
 .suggestions-table tr:last-child td { border-bottom: none; }
@@ -195,21 +195,21 @@ onMounted(async () => {
 .suggestions-table tbody tr:hover { background: #f9fafb; }
 
 .cell-id {
-  font-size: 12px; color: #9ca3af; font-family: monospace; white-space: nowrap;
+  font-size: 0.75rem; color: #9ca3af; font-family: monospace; white-space: nowrap;
 }
 
 .cell-text {
-  max-width: 320px; overflow: hidden; text-overflow: ellipsis;
+  max-width: 20rem; overflow: hidden; text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .cell-actions {
-  display: flex; gap: 4px; white-space: nowrap;
+  display: flex; gap: 0.25rem; white-space: nowrap;
 }
 
 .status-badge {
-  display: inline-block; padding: 3px 10px; border-radius: 12px;
-  font-size: 12px; font-weight: 600; white-space: nowrap;
+  display: inline-block; padding: 0.1875rem 0.625rem; border-radius: 0.75rem;
+  font-size: 0.75rem; font-weight: 600; white-space: nowrap;
 }
 
 .status-pending   { background: #fef9c3; color: #a16207; }
@@ -218,7 +218,7 @@ onMounted(async () => {
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;
+  padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;
   border: none; cursor: pointer; transition: background 0.15s;
 }
 
@@ -227,7 +227,7 @@ onMounted(async () => {
 .btn-primary:hover:not(:disabled) { background: #1e40af; }
 .btn-secondary { background: #e5e7eb; color: #374151; }
 .btn-secondary:hover:not(:disabled) { background: #d1d5db; }
-.btn-sm { padding: 4px 10px; font-size: 13px; }
+.btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
 .btn-ghost { background: transparent; color: #6b7280; }
 .btn-ghost:hover { background: #f3f4f6; color: #374151; }
 .btn-danger { color: #dc2626; }
@@ -243,21 +243,21 @@ onMounted(async () => {
 }
 .btn-warning:hover { background: #a16207; }
 
-.state-message { padding: 40px 0; text-align: center; color: #6b7280; font-size: 15px; }
+.state-message { padding: 2.5rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
 .state-error { color: #dc2626; }
 
 .input {
-  padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;
-  font-size: 14px; color: #111827; background: #ffffff; outline: none;
+  padding: 0.5rem 0.75rem; border: 0.0625rem solid #d1d5db; border-radius: 0.375rem;
+  font-size: 0.875rem; color: #111827; background: #ffffff; outline: none;
 }
 
-.input:focus { border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1); }
+.input:focus { border-color: #1a56db; box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
 
-@container (max-width: 640px) {
+@container (max-width: 40rem) {
   .view-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .filter-bar {
@@ -275,8 +275,8 @@ onMounted(async () => {
   }
 
   .suggestions-table tr {
-    padding: 14px 16px;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.875rem 1rem;
+    border-bottom: 0.0625rem solid #e5e7eb;
   }
 
   .suggestions-table tr:last-child {
@@ -284,20 +284,20 @@ onMounted(async () => {
   }
 
   .suggestions-table td {
-    padding: 4px 0;
+    padding: 0.25rem 0;
     border-bottom: none;
   }
 
   .suggestions-table td:nth-child(1) {
     font-weight: 600;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .suggestions-table td:not(:first-child):not(:last-child)::before {
     content: attr(data-label);
     display: inline-block;
-    width: 100px;
-    font-size: 12px;
+    width: 6.25rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
@@ -306,7 +306,7 @@ onMounted(async () => {
   }
 
   .suggestions-table td:last-child {
-    padding-top: 8px;
+    padding-top: 0.5rem;
   }
 
   .cell-text {

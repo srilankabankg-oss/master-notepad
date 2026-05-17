@@ -17,10 +17,10 @@ import AppHeader from '@/components/AppHeader.vue'
 
 <style>
 :root {
-  --bp-sm: 640px;
-  --bp-md: 768px;
-  --bp-lg: 1024px;
-  --sidebar-width: 240px;
+  --bp-sm: 40rem;
+  --bp-md: 48rem;
+  --bp-lg: 64rem;
+  --sidebar-width: 15rem;
 }
 
 *,
@@ -31,10 +31,14 @@ import AppHeader from '@/components/AppHeader.vue'
   padding: 0;
 }
 
+html {
+  font-size: 100%;
+}
+
 html, body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
   color: #1f2937;
   background: #f3f4f6;
@@ -75,7 +79,7 @@ a:hover {
 
 .app-content {
   flex: 1;
-  padding: 24px 32px;
+  padding: 1.5rem 2rem;
   overflow-y: auto;
   container-type: inline-size;
   container-name: app-content;
@@ -83,7 +87,7 @@ a:hover {
 
 @media (max-width: 767px) {
   .app-content {
-    padding: 16px;
+    padding: 1rem;
   }
 }
 </style>

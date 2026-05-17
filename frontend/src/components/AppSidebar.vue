@@ -67,7 +67,7 @@ function isActive(name: string) {
 
 <style scoped>
 .sidebar {
-  width: var(--sidebar-width, 240px);
+  width: 15rem;
   min-height: 100vh;
   background: #1e293b;
   display: flex;
@@ -78,20 +78,20 @@ function isActive(name: string) {
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px 20px 24px;
-  border-bottom: 1px solid #334155;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1.5rem;
+  border-bottom: 0.0625rem solid #334155;
 }
 
 .brand-icon {
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   color: #60a5fa;
   flex-shrink: 0;
 }
 
 .brand-text {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #f1f5f9;
   white-space: nowrap;
@@ -100,17 +100,17 @@ function isActive(name: string) {
 .nav-list {
   display: flex;
   flex-direction: column;
-  padding: 12px 8px;
-  gap: 2px;
+  padding: 0.75rem 0.5rem;
+  gap: 0.125rem;
 }
 
 .nav-item {
   display: block;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
 }
@@ -128,24 +128,24 @@ function isActive(name: string) {
 .hamburger {
   display: none;
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: 0.75rem;
+  left: 0.75rem;
   z-index: 50;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
+  gap: 0.3125rem;
+  padding: 0.5rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 0.375rem;
   background: #1e293b;
   cursor: pointer;
 }
 
 .hamburger-line {
   display: block;
-  width: 20px;
-  height: 2px;
+  width: 1.25rem;
+  height: 0.125rem;
   background: #cbd5e1;
-  border-radius: 1px;
+  border-radius: 0.0625rem;
   transition: background 0.15s;
 }
 
@@ -174,7 +174,7 @@ function isActive(name: string) {
 
   .sidebar--open {
     transform: translateX(0);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0.25rem 0 1.25rem rgba(0, 0, 0, 0.3);
   }
 
   .hamburger {

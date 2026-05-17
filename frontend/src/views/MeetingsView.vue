@@ -201,46 +201,46 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.view { max-width: 900px; container-type: inline-size; }
+.view { max-width: 56.25rem; container-type: inline-size; }
 
 .view-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
-.view-title { font-size: 18px; font-weight: 600; color: #111827; }
+.view-title { font-size: 1.125rem; font-weight: 600; color: #111827; }
 
-.filter-bar { margin-bottom: 18px; }
+.filter-bar { margin-bottom: 1.125rem; }
 
 .filter-label {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 500; color: #374151;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.875rem; font-weight: 500; color: #374151;
 }
 
-.filter-select { width: 260px; }
+.filter-select { width: 16.25rem; }
 
-.meeting-list { display: flex; flex-direction: column; gap: 14px; }
+.meeting-list { display: flex; flex-direction: column; gap: 0.875rem; }
 
 .meeting-card {
-  background: #ffffff; border: 1px solid #e5e7eb;
-  border-radius: 8px; padding: 20px;
+  background: #ffffff; border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.5rem; padding: 1.25rem;
 }
 
-.meeting-head { margin-bottom: 12px; }
-.meeting-title { font-size: 16px; font-weight: 600; color: #111827; margin: 0; }
-.meeting-meta { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+.meeting-head { margin-bottom: 0.75rem; }
+.meeting-title { font-size: 1rem; font-weight: 600; color: #111827; margin: 0; }
+.meeting-meta { font-size: 0.75rem; color: #9ca3af; margin-top: 0.125rem; }
 
-.meeting-body { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.meeting-body { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
 
 .meeting-section strong {
-  font-size: 13px; font-weight: 600; color: #374151;
+  font-size: 0.8125rem; font-weight: 600; color: #374151;
 }
 
 .meeting-section p {
-  font-size: 14px; color: #4b5563; margin: 2px 0 0; line-height: 1.5;
+  font-size: 0.875rem; color: #4b5563; margin: 0.125rem 0 0; line-height: 1.5;
 }
 
-.meeting-actions { display: flex; gap: 4px; }
+.meeting-actions { display: flex; gap: 0.25rem; }
 
 .modal-overlay {
   position: fixed; inset: 0;
@@ -250,34 +250,34 @@ onMounted(async () => {
 }
 
 .modal {
-  background: #ffffff; border-radius: 12px;
-  padding: 28px; width: 540px; max-width: 90vw;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  background: #ffffff; border-radius: 0.75rem;
+  padding: 1.75rem; width: 33.75rem; max-width: 90vw;
+  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.15);
 }
 
-.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111827; }
+.modal-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; color: #111827; }
 
-.form { display: flex; flex-direction: column; gap: 16px; }
-.field { display: flex; flex-direction: column; gap: 4px; }
-.field-label { font-size: 13px; font-weight: 500; color: #374151; }
+.form { display: flex; flex-direction: column; gap: 1rem; }
+.field { display: flex; flex-direction: column; gap: 0.25rem; }
+.field-label { font-size: 0.8125rem; font-weight: 500; color: #374151; }
 
 .input {
-  padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;
-  font-size: 14px; color: #111827; background: #ffffff; outline: none;
+  padding: 0.5rem 0.75rem; border: 0.0625rem solid #d1d5db; border-radius: 0.375rem;
+  font-size: 0.875rem; color: #111827; background: #ffffff; outline: none;
 }
 
-.input:focus { border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1); }
-.textarea { resize: vertical; min-height: 60px; }
+.input:focus { border-color: #1a56db; box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1); }
+.textarea { resize: vertical; min-height: 3.75rem; }
 
-.form-error { color: #dc2626; font-size: 13px; }
-.form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.form-error { color: #dc2626; font-size: 0.8125rem; }
+.form-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 
-.state-message { padding: 40px 0; text-align: center; color: #6b7280; font-size: 15px; }
+.state-message { padding: 2.5rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
 .state-error { color: #dc2626; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;
+  padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;
   border: none; cursor: pointer; transition: background 0.15s;
 }
 
@@ -286,17 +286,17 @@ onMounted(async () => {
 .btn-primary:hover:not(:disabled) { background: #1e40af; }
 .btn-secondary { background: #e5e7eb; color: #374151; }
 .btn-secondary:hover:not(:disabled) { background: #d1d5db; }
-.btn-sm { padding: 4px 10px; font-size: 13px; }
+.btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
 .btn-ghost { background: transparent; color: #6b7280; }
 .btn-ghost:hover { background: #f3f4f6; color: #374151; }
 .btn-danger { color: #dc2626; }
 .btn-danger:hover { background: #fef2f2; color: #b91c1c; }
 
-@container (max-width: 640px) {
+@container (max-width: 40rem) {
   .view-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .filter-bar {
@@ -312,7 +312,7 @@ onMounted(async () => {
   }
 
   .meeting-card {
-    padding: 16px;
+    padding: 1rem;
   }
 
   .modal-overlay {
@@ -322,8 +322,8 @@ onMounted(async () => {
   .modal {
     width: 100%;
     max-width: 100vw;
-    border-radius: 12px 12px 0 0;
-    padding: 24px 16px;
+    border-radius: 0.75rem 0.75rem 0 0;
+    padding: 1.5rem 1rem;
     max-height: 90vh;
     overflow-y: auto;
   }

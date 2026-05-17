@@ -26,22 +26,22 @@ const pageTitle = computed(() => {
 
 <style scoped>
 .app-header {
-  height: 60px;
-  padding: 0 32px;
+  height: 3.75rem;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 0.0625rem solid #e5e7eb;
   background: #ffffff;
 }
 
 @media (max-width: 767px) {
   .app-header {
-    padding-left: 60px;
+    padding-left: 3.75rem;
   }
 }
 
 .app-title {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
   margin: 0;

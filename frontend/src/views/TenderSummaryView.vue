@@ -154,26 +154,26 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.view { max-width: 900px; container-type: inline-size; }
+.view { max-width: 56.25rem; container-type: inline-size; }
 
 .btn-back {
   background: none;
   border: none;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 0.875rem;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .btn-back:hover { color: #1a56db; }
 
 .detail-card {
   background: #ffffff;
-  border-radius: 10px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+  border-radius: 0.625rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.25rem;
 }
 
 .detail-header {
@@ -183,117 +183,117 @@ onMounted(async () => {
 }
 
 .detail-name {
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 700;
   color: #111827;
 }
 
 .detail-meta {
-  margin-top: 4px;
-  font-size: 14px;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
   color: #6b7280;
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
-.meta-sep::before { content: '·'; margin-right: 8px; }
+.meta-sep::before { content: '·'; margin-right: 0.5rem; }
 
 .detail-rating {
   text-align: center;
 }
 
 .rating-value {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
 }
 
 .detail-desc {
-  margin-top: 12px;
+  margin-top: 0.75rem;
   color: #374151;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .detail-contact {
-  margin-top: 6px;
+  margin-top: 0.375rem;
   color: #6b7280;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .stats-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .stat-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 14px 20px;
+  border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
   flex: 1;
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1a56db;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #6b7280;
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 4px 0;
+  margin: 0 0 0.25rem 0;
 }
 
 .item-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 14px 16px;
+  border: 0.0625rem solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
 }
 
 .item-head {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 6px;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
 }
 
 .item-author {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #111827;
 }
 
 .item-rating {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .item-date {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #9ca3af;
   margin-left: auto;
 }
 
 .item-body {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #374151;
   line-height: 1.6;
 }
@@ -301,9 +301,9 @@ onMounted(async () => {
 .event-badge-detail {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 0.125rem 0.625rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -315,9 +315,9 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   font-weight: 500;
   border: none;
   cursor: pointer;
@@ -329,31 +329,31 @@ onMounted(async () => {
 .btn-primary:hover:not(:disabled) { background: #1e40af; }
 .btn-secondary { background: #e5e7eb; color: #374151; }
 .btn-secondary:hover:not(:disabled) { background: #d1d5db; }
-.btn-sm { padding: 4px 10px; font-size: 13px; }
+.btn-sm { padding: 0.25rem 0.625rem; font-size: 0.8125rem; }
 .btn-ghost { background: transparent; color: #6b7280; }
 .btn-ghost:hover { background: #f3f4f6; color: #374151; }
 .btn-danger { color: #dc2626; }
 .btn-danger:hover { background: #fef2f2; color: #b91c1c; }
 
-.state-message { padding: 32px 0; text-align: center; color: #6b7280; font-size: 15px; }
+.state-message { padding: 2rem 0; text-align: center; color: #6b7280; font-size: 0.9375rem; }
 .state-error { color: #dc2626; }
 
-@container (max-width: 640px) {
+@container (max-width: 40rem) {
   .detail-header {
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .detail-card {
-    padding: 18px;
+    padding: 1.125rem;
   }
 
   .detail-name {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 
   .rating-value {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
 
   .stats-row {
@@ -362,11 +362,11 @@ onMounted(async () => {
 
   .item-head {
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.5rem;
   }
 
   .item-card {
-    padding: 12px 14px;
+    padding: 0.75rem 0.875rem;
   }
 
   .item-date {

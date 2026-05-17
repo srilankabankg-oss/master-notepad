@@ -170,7 +170,7 @@ onMounted(() => {
 
 <style scoped>
 .view {
-  max-width: 1100px;
+  max-width: 68.75rem;
   container-type: inline-size;
 }
 
@@ -178,11 +178,11 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .view-title {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
 }
@@ -191,26 +191,26 @@ onMounted(() => {
   width: 100%;
   border-collapse: collapse;
   background: #ffffff;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.08);
 }
 
 .table th {
   text-align: left;
-  padding: 12px 16px;
-  font-size: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 0.0625rem solid #e5e7eb;
 }
 
 .table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 0.75rem 1rem;
+  border-bottom: 0.0625rem solid #f3f4f6;
   color: #374151;
 }
 
@@ -232,11 +232,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
-  padding: 2px 8px;
-  border-radius: 6px;
+  min-width: 2.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.375rem;
   color: #ffffff;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -252,43 +252,43 @@ onMounted(() => {
 
 .modal {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 28px;
-  width: 480px;
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+  width: 30rem;
   max-width: 90vw;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.15);
 }
 
 .modal-title {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   color: #111827;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: #374151;
 }
 
 .input {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0.5rem 0.75rem;
+  border: 0.0625rem solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   color: #111827;
   background: #ffffff;
   outline: none;
@@ -297,31 +297,31 @@ onMounted(() => {
 
 .input:focus {
   border-color: #1a56db;
-  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+  box-shadow: 0 0 0 0.1875rem rgba(26, 86, 219, 0.1);
 }
 
 .textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 3.75rem;
 }
 
 .form-error {
   color: #dc2626;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .state-message {
-  padding: 40px 0;
+  padding: 2.5rem 0;
   text-align: center;
   color: #6b7280;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .state-error {
@@ -332,9 +332,9 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   font-weight: 500;
   border: none;
   cursor: pointer;
@@ -365,8 +365,8 @@ onMounted(() => {
 }
 
 .btn-sm {
-  padding: 4px 10px;
-  font-size: 13px;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
 }
 
 .btn-ghost {
@@ -388,11 +388,11 @@ onMounted(() => {
   color: #b91c1c;
 }
 
-@container (max-width: 640px) {
+@container (max-width: 40rem) {
   .view-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .table thead {
@@ -406,8 +406,8 @@ onMounted(() => {
   }
 
   .table tr {
-    padding: 14px 16px;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.875rem 1rem;
+    border-bottom: 0.0625rem solid #e5e7eb;
   }
 
   .table tr:last-child {
@@ -415,21 +415,21 @@ onMounted(() => {
   }
 
   .table td {
-    padding: 4px 0;
+    padding: 0.25rem 0;
     border-bottom: none;
   }
 
   .table td:first-child {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 0.9375rem;
     color: #1a56db;
   }
 
   .table td:not(:first-child):not(:last-child)::before {
     content: attr(data-label);
     display: inline-block;
-    width: 110px;
-    font-size: 12px;
+    width: 6.875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #6b7280;
     text-transform: uppercase;
@@ -438,7 +438,7 @@ onMounted(() => {
   }
 
   .table td:last-child {
-    padding-top: 8px;
+    padding-top: 0.5rem;
   }
 
   .modal-overlay {
@@ -448,8 +448,8 @@ onMounted(() => {
   .modal {
     width: 100%;
     max-width: 100vw;
-    border-radius: 12px 12px 0 0;
-    padding: 24px 16px;
+    border-radius: 0.75rem 0.75rem 0 0;
+    padding: 1.5rem 1rem;
     max-height: 90vh;
     overflow-y: auto;
   }

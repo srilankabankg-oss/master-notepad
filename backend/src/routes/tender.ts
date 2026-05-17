@@ -52,7 +52,9 @@ tenderRouter.get('/:id/summary', async (req, res, next) => {
 
     res.json({
       subcontractor,
-      rating: 0,
+      rating: reviews.length
+        ? +((reviews as any[]).reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+        : 0,
       reviews,
       events,
       meetings,
