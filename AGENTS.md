@@ -36,12 +36,16 @@ master-notepad/
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL 14+
+- Docker (PostgreSQL runs in `master-notepad-pg` container on port 5433)
+- PostgreSQL 14+ (via Docker container `master-notepad-pg`, port `5433`)
 
 ### Setup
 ```bash
 # Install dependencies
 npm install
+
+# Start PostgreSQL (Docker)
+docker start master-notepad-pg
 
 # Configure database (copy .env.example to .env and set DATABASE_URL)
 cd backend
