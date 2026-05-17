@@ -22,7 +22,7 @@ const createSurveySchema = z.object({
   questions: z.array(z.string()).default(defaultQuestions),
 });
 
-const createResponseSchema = z.object({
+const _createResponseSchema = z.object({
   surveyId: z.number().int().positive(),
   employeeId: z.number().int().positive(),
   answers: z.record(z.string(), z.string()),

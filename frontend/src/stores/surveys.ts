@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api, errorMessage } from '@/api/client'
-import type { Survey, SurveyCreate, SurveyResponse, SurveyResponseCreate } from '@/types/api'
+import type { Survey, SurveyCreate, SurveyResponseCreate } from '@/types/api'
 
 export const useSurveyStore = defineStore('surveys', () => {
   const items = ref<Survey[]>([])

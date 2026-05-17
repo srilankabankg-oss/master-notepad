@@ -3,7 +3,7 @@ import { ZodError } from 'zod';
 
 export class AppError extends Error {
   constructor(
-    public statusCode: number,
+    public _statusCode: number,
     message: string,
   ) {
     super(message);

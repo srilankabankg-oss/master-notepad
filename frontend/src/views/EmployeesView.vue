@@ -5,7 +5,6 @@ import type { EmployeeCreate } from '@/types/api'
 import { useEntityForm } from '@/composables/useEntityForm'
 import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
 import Modal from '@/components/Modal.vue'
-import BaseButton from '@/components/BaseButton.vue'
 
 const store = useEmployeeStore()
 

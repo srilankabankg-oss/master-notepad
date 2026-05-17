@@ -7,9 +7,8 @@ import { errorMessage } from '@/api/client'
 import { useEmployeeName } from '@/composables/useEntityName'
 import { ratingColor } from '@/composables/useRating'
 import { formatDate, formatDateTime } from '@/composables/useDateFormatter'
-import { eventTypeLabel, eventTypeClass } from '@/composables/useEventLabels'
 import EventBadge from '@/components/EventBadge.vue'
-import type { TenderSummary, Subcontractor, Review, ContractorEvent, Meeting, Comment } from '@/types/api'
+import type { TenderSummary } from '@/types/api'
 
 const route = useRoute()
 const router = useRouter()

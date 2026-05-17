@@ -111,7 +111,7 @@ describe('useEntityForm', () => {
     })
 
     it('formLoading is true during async submit, false after', async () => {
-      let resolveSubmit: (value: void) => void
+      let resolveSubmit: (_value: void) => void
       const onSubmit = vi.fn().mockReturnValue(
         new Promise<void>((resolve) => { resolveSubmit = resolve }),
       )

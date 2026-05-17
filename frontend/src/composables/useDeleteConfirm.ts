@@ -7,7 +7,7 @@ import { errorMessage } from '@/api/client'
  * @returns `deleteItem(id)` — call directly from template click handlers
  */
 export function useDeleteConfirm(
-  removeFn: (id: number) => Promise<void>,
+  removeFn: (_id: number) => Promise<void>,
   entityName: string,
 ) {
   async function deleteItem(id: number) {
