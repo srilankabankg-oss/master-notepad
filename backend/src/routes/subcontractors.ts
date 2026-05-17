@@ -4,6 +4,7 @@ import { db, schema } from '../db/index.js';
 import { eq, sql } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { calculateWeightedRating } from '../utils/rating.js';
 
 export const subcontractorsRouter = Router();
 
@@ -19,8 +20,18 @@ const updateSubcontractorSchema = createSubcontractorSchema.partial();
 
 subcontractorsRouter.get('/', async (_req, res, next) => {
   try {
-    const result = await db.select().from(schema.subcontractors);
-    res.json(result);
+    const subcontractors = await db.select().from(schema.subcontractors);
+    const results = await Promise.all(
+      subcontractors.map(async (sub) => {
+        const [reviews, events] = await Promise.all([
+          db.select({ rating: schema.reviews.rating }).from(schema.reviews).where(eq(schema.reviews.subcontractorId, sub.id)),
+          db.select({ type: schema.contractorEvents.type }).from(schema.contractorEvents).where(eq(schema.contractorEvents.subcontractorId, sub.id)),
+        ]);
+        const rating = calculateWeightedRating(reviews, events.map((e) => e.type));
+        return { ...sub, rating };
+      })
+    );
+    res.json(results);
   } catch (e) { next(e); }
 });
 
@@ -29,11 +40,13 @@ subcontractorsRouter.get('/:id', async (req, res, next) => {
     const result = await db.select().from(schema.subcontractors).where(eq(schema.subcontractors.id, +req.params.id)).limit(1);
     if (!result.length) throw new AppError(404, 'Subcontractor not found');
 
-    const [rating] = await db.select({ avg: sql<number>`COALESCE(ROUND(AVG(rating), 1), 0)` })
-      .from(schema.reviews)
-      .where(eq(schema.reviews.subcontractorId, +req.params.id));
+    const [reviews, events] = await Promise.all([
+      db.select({ rating: schema.reviews.rating }).from(schema.reviews).where(eq(schema.reviews.subcontractorId, +req.params.id)),
+      db.select({ type: schema.contractorEvents.type }).from(schema.contractorEvents).where(eq(schema.contractorEvents.subcontractorId, +req.params.id)),
+    ]);
+    const rating = calculateWeightedRating(reviews, events.map((e) => e.type));
 
-    res.json({ ...result[0], rating: rating?.avg ?? 0 });
+    res.json({ ...result[0], rating });
   } catch (e) { next(e); }
 });
 

@@ -197,3 +197,14 @@ export interface ApiError {
   error: string
   details?: string[]
 }
+
+export interface TenderSummary {
+  subcontractor: Subcontractor
+  rating: number
+  reviews: Review[]
+  events: ContractorEvent[]
+  meetings: Meeting[]
+  comments: Comment[]
+  surveysCount: number
+  violationsCount: number
+}

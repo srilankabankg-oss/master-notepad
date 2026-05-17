@@ -26,7 +26,7 @@ function formatDateTime(dateStr: string): string {
 
 function getSubcontractorName(id: number | null): string {
   if (!id) return '-'
-  return subcontractorStore.items.find((s) => s.id === id)?.name || `#${id}`
+  return subcontractorStore.items.find((s) => s.id === id)?.name || (id != null ? `#${id}` : '—')
 }
 
 function openCreate() {

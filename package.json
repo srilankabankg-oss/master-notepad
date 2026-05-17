@@ -1,7 +1,10 @@
 {
   "name": "master-notepad",
   "private": true,
-  "workspaces": ["backend", "frontend"],
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend && npm run build -w frontend",
@@ -10,6 +13,7 @@
     "db:push": "npm run db:push -w backend"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "concurrently": "^9.1.0",
     "typescript": "^5.7.0"
   }

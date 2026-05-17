@@ -347,7 +347,7 @@ async function deleteEvent(id: number) {
 
 function getEmployeeName(id: number): string {
   const emp = employeeStore.items.find((e) => e.id === id)
-  return emp ? emp.name : `#${id}`
+  return emp ? emp.name : (id != null ? `#${id}` : '—')
 }
 
 const subSurveys = ref<Survey[]>([])

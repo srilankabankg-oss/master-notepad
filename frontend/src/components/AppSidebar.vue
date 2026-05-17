@@ -26,10 +26,11 @@ const navItems = [
   { to: '/employees', label: 'Сотрудники', name: 'employees' },
   { to: '/suggestions', label: 'Предложения', name: 'suggestions' },
   { to: '/events', label: 'События', name: 'events' },
+  { to: '/tender/1', label: 'Тендерная справка', name: 'tender-summary' },
 ]
 
 function isActive(name: string) {
-  return route.name === name || (name === 'subcontractors' && route.name === 'subcontractor-detail')
+  return route.name === name || (name === 'subcontractors' && route.name === 'subcontractor-detail') || (name === 'tender-summary' && route.name === 'tender-summary')
 }
 </script>
 

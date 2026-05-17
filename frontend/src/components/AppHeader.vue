@@ -12,6 +12,7 @@ const pageTitle = computed(() => {
     checklists: 'Чек-листы',
     meetings: 'Протоколы встреч',
     surveys: 'Опросы',
+    'tender-summary': 'Тендерная справка',
   }
   return titles[route.name as string] || ''
 })
@@ -31,6 +32,12 @@ const pageTitle = computed(() => {
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
   background: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .app-header {
+    padding-left: 60px;
+  }
 }
 
 .app-title {

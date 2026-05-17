@@ -9,6 +9,7 @@ import { meetingsRouter } from './routes/meetings.js';
 import { surveysRouter } from './routes/surveys.js';
 import { employeesRouter } from './routes/employees.js';
 import { eventsRouter } from './routes/events.js';
+import { tenderRouter } from './routes/tender.js';
 import { errorHandler } from './middleware/error-handler.js';
 
 export const app = express();
@@ -25,6 +26,7 @@ app.use('/api/checklists', checklistsRouter);
 app.use('/api/suggestions', suggestionsRouter);
 app.use('/api/meetings', meetingsRouter);
 app.use('/api/surveys', surveysRouter);
+app.use('/api/tender', tenderRouter);
 app.use('/api/events', eventsRouter);
 
 // Health check

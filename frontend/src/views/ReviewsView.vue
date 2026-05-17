@@ -25,11 +25,11 @@ function ratingColor(rating: number): string {
 }
 
 function getEmployeeName(id: number): string {
-  return employeeStore.items.find((e) => e.id === id)?.name || `#${id}`
+  return employeeStore.items.find((e) => e.id === id)?.name || (id != null ? `#${id}` : '—')
 }
 
 function getSubcontractorName(id: number): string {
-  return subcontractorStore.items.find((s) => s.id === id)?.name || `#${id}`
+  return subcontractorStore.items.find((s) => s.id === id)?.name || (id != null ? `#${id}` : '—')
 }
 
 function openCreate() {

@@ -22,7 +22,7 @@ function clearFilter() {
 }
 
 function getEmployeeName(id: number): string {
-  return employeeStore.items.find((e) => e.id === id)?.name || `#${id}`
+  return employeeStore.items.find((e) => e.id === id)?.name || (id != null ? `#${id}` : '—')
 }
 
 function statusLabel(status: SuggestionStatus): string {

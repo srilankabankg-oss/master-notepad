@@ -125,7 +125,7 @@ function completedCount(items: { text: string; completed: boolean }[]): number {
 
 function getEmployeeName(id: number | null): string {
   if (!id) return '-'
-  return employeeStore.items.find((e) => e.id === id)?.name || `#${id}`
+  return employeeStore.items.find((e) => e.id === id)?.name || (id != null ? `#${id}` : '—')
 }
 
 watch(activeType, () => loadData())

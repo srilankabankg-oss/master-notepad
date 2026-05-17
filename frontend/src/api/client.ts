@@ -8,7 +8,7 @@ import type {
   Meeting, MeetingCreate,
   Survey, SurveyCreate,
   SurveyResponse, SurveyResponseCreate,
-  ContractorEvent, ContractorEventCreate,
+  ContractorEvent, ContractorEventCreate, TenderSummary,
 } from '@/types/api'
 
 const BASE_URL = '/api'
@@ -29,7 +29,7 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await (globalThis as any).fetch(`${BASE_URL}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
@@ -172,6 +172,10 @@ export const api = {
       request<SurveyResponse>(`/surveys/${id}/respond`, { method: 'POST', body: JSON.stringify(data) }),
     responses: (id: number) =>
       request<SurveyResponse[]>(`/surveys/${id}/responses`),
+  },
+
+  tender: {
+    summary: (id: number) => request<TenderSummary>(`/tender/${id}/summary`),
   },
 }
 
