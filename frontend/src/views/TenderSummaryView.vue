@@ -70,7 +70,7 @@ onMounted(async () => {
           <div>
             <h2 class="detail-name">{{ summary.subcontractor.name }}</h2>
             <div class="detail-meta">
-              <span v-if="summary.subcontractor.company_name">{{ summary.subcontractor.company_name }}</span>
+              <span v-if="summary.subcontractor.companyName">{{ summary.subcontractor.companyName }}</span>
               <span v-if="summary.subcontractor.specialization" class="meta-sep">{{ summary.subcontractor.specialization }}</span>
             </div>
           </div>
@@ -81,7 +81,7 @@ onMounted(async () => {
           </div>
         </div>
         <div v-if="summary.subcontractor.description" class="detail-desc">{{ summary.subcontractor.description }}</div>
-        <div v-if="summary.subcontractor.contact_info" class="detail-contact">{{ summary.subcontractor.contact_info }}</div>
+        <div v-if="summary.subcontractor.contactInfo" class="detail-contact">{{ summary.subcontractor.contactInfo }}</div>
       </div>
 
       <div class="stats-row">
@@ -100,9 +100,9 @@ onMounted(async () => {
         <h3 class="section-title">Отзывы</h3>
         <div v-for="r in summary.reviews" :key="r.id" class="item-card">
           <div class="item-head">
-            <span class="item-author">{{ getEmployeeName(r.employee_id) }}</span>
+            <span class="item-author">{{ getEmployeeName(r.employeeId) }}</span>
             <span class="item-rating" :style="{ color: ratingColor(r.rating) }">{{ r.rating }}/10</span>
-            <span class="item-date">{{ formatDate(r.created_at) }}</span>
+            <span class="item-date">{{ formatDate(r.createdAt) }}</span>
           </div>
           <div class="item-body">{{ r.content }}</div>
         </div>
@@ -114,8 +114,8 @@ onMounted(async () => {
         <div v-for="ev in summary.events" :key="ev.id" class="item-card">
           <div class="item-head">
             <span :class="['event-badge-detail', eventTypeClass(ev.type)]">{{ eventTypeLabel(ev.type) }}</span>
-            <span class="item-date">{{ formatDate(ev.event_date) }}</span>
-            <span class="item-author">{{ getEmployeeName(ev.employee_id) }}</span>
+            <span class="item-date">{{ formatDate(ev.eventDate) }}</span>
+            <span class="item-author">{{ getEmployeeName(ev.employeeId) }}</span>
           </div>
           <div class="item-body">{{ ev.description }}</div>
         </div>
@@ -141,8 +141,8 @@ onMounted(async () => {
         <h3 class="section-title">Комментарии</h3>
         <div v-for="c in summary.comments" :key="c.id" class="item-card">
           <div class="item-head">
-            <span class="item-author">{{ getEmployeeName(c.employee_id) }}</span>
-            <span class="item-date">{{ formatDate(c.created_at) }}</span>
+            <span class="item-author">{{ getEmployeeName(c.employeeId) }}</span>
+            <span class="item-date">{{ formatDate(c.createdAt) }}</span>
           </div>
           <div class="item-body">{{ c.content }}</div>
         </div>

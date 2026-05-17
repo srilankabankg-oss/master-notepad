@@ -32,9 +32,9 @@ function openEdit(sub: any) {
   editingId.value = sub.id
   form.value = {
     name: sub.name,
-    companyName: sub.company_name || '',
+    companyName: sub.companyName || '',
     specialization: sub.specialization || '',
-    contactInfo: sub.contact_info || '',
+    contactInfo: sub.contactInfo || '',
     description: sub.description || '',
   }
   formError.value = ''
@@ -116,7 +116,7 @@ onMounted(() => {
           @click="router.push(`/subcontractors/${sub.id}`)"
         >
           <td class="cell-name" data-label="Название">{{ sub.name }}</td>
-          <td data-label="Компания">{{ sub.company_name || '-' }}</td>
+          <td data-label="Компания">{{ sub.companyName || '-' }}</td>
           <td data-label="Специализация">{{ sub.specialization || '-' }}</td>
           <td data-label="Рейтинг">
             <span class="rating-badge" :style="{ background: ratingColor(sub.rating) }">

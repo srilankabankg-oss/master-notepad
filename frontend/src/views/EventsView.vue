@@ -74,11 +74,11 @@ function openCreate() {
 function openEdit(ev: ContractorEvent) {
   editingId.value = ev.id
   formData.value = {
-    subcontractorId: ev.subcontractor_id,
-    employeeId: ev.employee_id,
+    subcontractorId: ev.subcontractorId,
+    employeeId: ev.employeeId,
     type: ev.type,
     description: ev.description,
-    eventDate: new Date(ev.event_date).toISOString().slice(0, 16),
+    eventDate: new Date(ev.eventDate).toISOString().slice(0, 16),
   }
   formError.value = ''
   showForm.value = true
@@ -114,7 +114,7 @@ async function deleteItem(id: number) {
 function openSuggest(ev: ContractorEvent) {
   suggestEventId.value = ev.id
   suggestChecklistId.value = 0
-  suggestEmployeeId.value = ev.employee_id
+  suggestEmployeeId.value = ev.employeeId
   suggestError.value = ''
   suggestModal.value = true
 }
@@ -180,12 +180,12 @@ onMounted(async () => {
         <div class="event-head">
           <div class="event-head-left">
             <span :class="['event-badge', eventTypeClass(ev.type)]">{{ eventTypeLabel(ev.type) }}</span>
-            <span class="event-date">{{ formatDate(ev.event_date) }}</span>
+            <span class="event-date">{{ formatDate(ev.eventDate) }}</span>
           </div>
           <div class="event-head-right">
-            <span class="event-meta">{{ getSubcontractorName(ev.subcontractor_id) }}</span>
+            <span class="event-meta">{{ getSubcontractorName(ev.subcontractorId) }}</span>
             <span class="event-meta-sep">&middot;</span>
-            <span class="event-meta">{{ getEmployeeName(ev.employee_id) }}</span>
+            <span class="event-meta">{{ getEmployeeName(ev.employeeId) }}</span>
           </div>
         </div>
         <div class="event-body">{{ ev.description }}</div>

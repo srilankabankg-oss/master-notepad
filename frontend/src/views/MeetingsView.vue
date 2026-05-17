@@ -45,7 +45,7 @@ function openEdit(m: Meeting) {
   formData.value = {
     title: m.title,
     date: new Date(m.date).toISOString().slice(0, 16),
-    subcontractorId: m.subcontractor_id,
+    subcontractorId: m.subcontractorId,
     attendees: [...m.attendees],
     agenda: m.agenda,
     decisions: m.decisions || '',
@@ -125,7 +125,7 @@ onMounted(async () => {
             <h3 class="meeting-title">{{ m.title }}</h3>
             <div class="meeting-meta">
               <span>{{ formatDateTime(m.date) }}</span>
-              <span v-if="m.subcontractor_id"> — {{ getSubcontractorName(m.subcontractor_id) }}</span>
+              <span v-if="m.subcontractorId"> — {{ getSubcontractorName(m.subcontractorId) }}</span>
             </div>
           </div>
         </div>

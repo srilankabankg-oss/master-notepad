@@ -110,8 +110,8 @@ onMounted(async () => {
         <tbody>
           <tr v-for="s in suggestionStore.items" :key="s.id">
             <td class="cell-id" data-label="ID">{{ s.id }}</td>
-            <td class="cell-id" data-label="Чек-лист">#{{ s.checklist_id }}</td>
-            <td data-label="Сотрудник">{{ getEmployeeName(s.employee_id) }}</td>
+            <td class="cell-id" data-label="Чек-лист">#{{ s.checklistId }}</td>
+            <td data-label="Сотрудник">{{ getEmployeeName(s.employeeId) }}</td>
             <td class="cell-text" data-label="Предложение">{{ s.suggestion }}</td>
             <td data-label="Статус">
               <span :class="['status-badge', `status-${s.status}`]">

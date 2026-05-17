@@ -217,7 +217,7 @@ function openMeetingEdit(m: Meeting) {
   meetingData.value = {
     title: m.title,
     date: new Date(m.date).toISOString().slice(0, 16),
-    subcontractorId: m.subcontractor_id,
+    subcontractorId: m.subcontractorId,
     attendees: m.attendees,
     agenda: m.agenda,
     decisions: m.decisions || '',
@@ -326,11 +326,11 @@ function openEventCreate() {
 function openEventEdit(ev: ContractorEvent) {
   eventEditingId.value = ev.id
   eventData.value = {
-    subcontractorId: ev.subcontractor_id,
-    employeeId: ev.employee_id,
+    subcontractorId: ev.subcontractorId,
+    employeeId: ev.employeeId,
     type: ev.type,
     description: ev.description,
-    eventDate: new Date(ev.event_date).toISOString().slice(0, 16),
+    eventDate: new Date(ev.eventDate).toISOString().slice(0, 16),
   }
   eventError.value = ''
   eventForm.value = true
@@ -352,7 +352,7 @@ function getEmployeeName(id: number): string {
 
 const subSurveys = ref<Survey[]>([])
 watch(() => surveyStore.items, () => {
-  subSurveys.value = surveyStore.items.filter((s) => s.subcontractor_id === subId)
+  subSurveys.value = surveyStore.items.filter((s) => s.subcontractorId === subId)
 }, { immediate: true, deep: true })
 
 onMounted(async () => {
@@ -373,7 +373,7 @@ onMounted(async () => {
           <div>
             <h2 class="detail-name">{{ sub.name }}</h2>
             <div class="detail-meta">
-              <span v-if="sub.company_name">{{ sub.company_name }}</span>
+              <span v-if="sub.companyName">{{ sub.companyName }}</span>
               <span v-if="sub.specialization" class="meta-sep">{{ sub.specialization }}</span>
             </div>
           </div>
@@ -384,7 +384,7 @@ onMounted(async () => {
           </div>
         </div>
         <div v-if="sub.description" class="detail-desc">{{ sub.description }}</div>
-        <div v-if="sub.contact_info" class="detail-contact">{{ sub.contact_info }}</div>
+        <div v-if="sub.contactInfo" class="detail-contact">{{ sub.contactInfo }}</div>
       </div>
 
       <div class="tabs">
@@ -432,9 +432,9 @@ onMounted(async () => {
 
         <div v-for="r in reviewStore.items" :key="r.id" class="item-card">
           <div class="item-head">
-            <span class="item-author">{{ getEmployeeName(r.employee_id) }}</span>
+            <span class="item-author">{{ getEmployeeName(r.employeeId) }}</span>
             <span class="item-rating" :style="{ color: ratingColor(r.rating) }">{{ r.rating }}/10</span>
-            <span class="item-date">{{ formatDate(r.created_at) }}</span>
+            <span class="item-date">{{ formatDate(r.createdAt) }}</span>
             <button class="btn btn-sm btn-ghost btn-danger" @click="deleteReview(r.id)">Удалить</button>
           </div>
           <div class="item-body">{{ r.content }}</div>
@@ -468,8 +468,8 @@ onMounted(async () => {
 
         <div v-for="c in commentStore.items" :key="c.id" class="item-card">
           <div class="item-head">
-            <span class="item-author">{{ getEmployeeName(c.employee_id) }}</span>
-            <span class="item-date">{{ formatDate(c.created_at) }}</span>
+            <span class="item-author">{{ getEmployeeName(c.employeeId) }}</span>
+            <span class="item-date">{{ formatDate(c.createdAt) }}</span>
             <button class="btn btn-sm btn-ghost btn-danger" @click="deleteComment(c.id)">Удалить</button>
           </div>
           <div class="item-body">{{ c.content }}</div>
@@ -557,7 +557,7 @@ onMounted(async () => {
           <div class="item-head">
             <span class="item-author">{{ s.title }}</span>
             <span>{{ s.questions.length }} вопросов</span>
-            <span class="item-date">{{ formatDate(s.created_at) }}</span>
+            <span class="item-date">{{ formatDate(s.createdAt) }}</span>
             <button class="btn btn-sm btn-ghost" @click="openResponseForm(s)">Ответить</button>
             <button class="btn btn-sm btn-ghost btn-danger" @click="deleteSurvey(s.id)">Удалить</button>
           </div>
@@ -627,8 +627,8 @@ onMounted(async () => {
         <div v-for="ev in eventStore.items" :key="ev.id" class="item-card">
           <div class="item-head">
             <span :class="['event-badge-detail', eventTypeClass(ev.type)]">{{ eventTypeLabel(ev.type) }}</span>
-            <span class="item-date">{{ formatDate(ev.event_date) }}</span>
-            <span class="item-author">{{ getEmployeeName(ev.employee_id) }}</span>
+            <span class="item-date">{{ formatDate(ev.eventDate) }}</span>
+            <span class="item-author">{{ getEmployeeName(ev.employeeId) }}</span>
             <button class="btn btn-sm btn-ghost" @click="openEventEdit(ev)">Изменить</button>
             <button class="btn btn-sm btn-ghost btn-danger" @click="deleteEvent(ev.id)">Удалить</button>
           </div>

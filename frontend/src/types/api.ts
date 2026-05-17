@@ -3,8 +3,8 @@ export interface Employee {
   name: string
   email: string
   position: string | null
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface EmployeeCreate {
@@ -16,13 +16,13 @@ export interface EmployeeCreate {
 export interface Subcontractor {
   id: number
   name: string
-  company_name: string | null
-  contact_info: string | null
+  companyName: string | null
+  contactInfo: string | null
   specialization: string | null
   description: string | null
   rating?: number
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SubcontractorCreate {
@@ -35,12 +35,12 @@ export interface SubcontractorCreate {
 
 export interface Review {
   id: number
-  subcontractor_id: number
-  employee_id: number
+  subcontractorId: number
+  employeeId: number
   content: string
   rating: number
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ReviewCreate {
@@ -52,11 +52,11 @@ export interface ReviewCreate {
 
 export interface Comment {
   id: number
-  subcontractor_id: number
-  employee_id: number
+  subcontractorId: number
+  employeeId: number
   content: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CommentCreate {
@@ -80,10 +80,10 @@ export interface Checklist {
   id: number
   title: string
   type: ChecklistType
-  owner_id: number | null
+  ownerId: number | null
   items: ChecklistItem[]
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ChecklistCreate {
@@ -102,12 +102,12 @@ export type SuggestionStatus = 'pending' | 'approved' | 'rejected'
 
 export interface Suggestion {
   id: number
-  checklist_id: number
-  employee_id: number
+  checklistId: number
+  employeeId: number
   suggestion: string
   status: SuggestionStatus
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SuggestionCreate {
@@ -124,13 +124,13 @@ export interface Meeting {
   id: number
   title: string
   date: string
-  subcontractor_id: number | null
+  subcontractorId: number | null
   attendees: string[]
   agenda: string
   decisions: string | null
   notes: string | null
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface MeetingCreate {
@@ -146,11 +146,11 @@ export interface MeetingCreate {
 export interface Survey {
   id: number
   title: string
-  subcontractor_id: number
-  created_by: number
+  subcontractorId: number
+  createdBy: number
   questions: string[]
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SurveyCreate {
@@ -162,10 +162,10 @@ export interface SurveyCreate {
 
 export interface SurveyResponse {
   id: number
-  survey_id: number
-  employee_id: number
+  surveyId: number
+  employeeId: number
   answers: Record<string, string>
-  created_at: string
+  createdAt: string
 }
 
 export interface SurveyResponseCreate {
@@ -177,12 +177,13 @@ export type EventType = 'positive' | 'violation' | 'info'
 
 export interface ContractorEvent {
   id: number
-  subcontractor_id: number
-  employee_id: number
+  subcontractorId: number
+  employeeId: number
   type: EventType
   description: string
-  event_date: string
-  created_at: string
+  eventDate: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ContractorEventCreate {

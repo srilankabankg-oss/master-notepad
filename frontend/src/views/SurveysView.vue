@@ -132,8 +132,8 @@ onMounted(async () => {
           <div>
             <h3 class="survey-title">{{ s.title }}</h3>
             <div class="survey-meta">
-              Подрядчик: {{ getSubcontractorName(s.subcontractor_id) }} |
-              Создал: {{ getEmployeeName(s.created_by) }} |
+              Подрядчик: {{ getSubcontractorName(s.subcontractorId) }} |
+              Создал: {{ getEmployeeName(s.createdBy) }} |
               {{ s.questions.length }} вопросов
             </div>
           </div>
@@ -217,7 +217,7 @@ onMounted(async () => {
         <div v-else-if="responseList.length === 0" class="state-message">Нет ответов</div>
         <div v-else class="responses-list">
           <div v-for="(resp, ri) in responseList" :key="resp.id" class="response-card">
-            <div class="response-head">Сотрудник #{{ resp.employee_id }} — {{ new Date(resp.created_at).toLocaleString('ru-RU') }}</div>
+            <div class="response-head">Сотрудник #{{ resp.employeeId }} — {{ new Date(resp.createdAt).toLocaleString('ru-RU') }}</div>
             <div v-for="(answer, q) in resp.answers" :key="q" class="response-item">
               <strong>{{ q }}</strong>
               <p>{{ answer }}</p>

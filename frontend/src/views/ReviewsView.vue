@@ -41,7 +41,7 @@ function openCreate() {
 
 function openEdit(r: Review) {
   editingId.value = r.id
-  formData.value = { subcontractorId: r.subcontractor_id, employeeId: r.employee_id, content: r.content, rating: r.rating }
+  formData.value = { subcontractorId: r.subcontractorId, employeeId: r.employeeId, content: r.content, rating: r.rating }
   formError.value = ''
   showForm.value = true
 }
@@ -113,8 +113,8 @@ onMounted(async () => {
       <div v-for="r in reviewStore.items" :key="r.id" class="review-card">
         <div class="review-head">
           <div>
-            <span class="review-author">{{ getEmployeeName(r.employee_id) }}</span>
-            <span class="review-sub">— {{ getSubcontractorName(r.subcontractor_id) }}</span>
+            <span class="review-author">{{ getEmployeeName(r.employeeId) }}</span>
+            <span class="review-sub">— {{ getSubcontractorName(r.subcontractorId) }}</span>
           </div>
           <span class="review-rating" :style="{ color: ratingColor(r.rating) }">{{ r.rating }}/10</span>
         </div>

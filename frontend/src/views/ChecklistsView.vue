@@ -171,7 +171,7 @@ onMounted(async () => {
             <h3 class="checklist-title">{{ cl.title }}</h3>
             <span class="checklist-meta">
               {{ cl.type === 'organization' ? 'Организационный' : 'Персональный' }}
-              <template v-if="cl.owner_id"> — {{ getEmployeeName(cl.owner_id) }}</template>
+              <template v-if="cl.ownerId"> — {{ getEmployeeName(cl.ownerId) }}</template>
             </span>
           </div>
           <div class="checklist-progress">{{ completedCount(cl.items) }}/{{ cl.items.length }}</div>
