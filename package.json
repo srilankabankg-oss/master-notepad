@@ -10,11 +10,19 @@
     "build": "npm run build -w backend && npm run build -w frontend",
     "db:generate": "npm run db:generate -w backend",
     "db:migrate": "npm run db:migrate -w backend",
-    "db:push": "npm run db:push -w backend"
+    "db:push": "npm run db:push -w backend",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "concurrently": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
     "typescript": "^5.7.0"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.ts": "npx eslint --config frontend/eslint.config.js --",
+    "frontend/src/**/*.vue": "npx eslint --config frontend/eslint.config.js --",
+    "backend/src/**/*.ts": "npx eslint --config backend/eslint.config.js --"
   }
 }

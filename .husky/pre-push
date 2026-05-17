@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🏗️  Running build..."
+npm run build 2>&1
+
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+  echo ""
+  echo "❌ Build failed! Fix errors before pushing."
+  exit 1
+fi
+
+echo ""
+echo "✅ Build passed!"
