@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { env } from './env.js';
 import { subcontractorsRouter } from './routes/subcontractors.js';
 import { reviewsRouter } from './routes/reviews.js';
 import { commentsRouter } from './routes/comments.js';
@@ -14,7 +17,24 @@ import { errorHandler } from './middleware/error-handler.js';
 
 export const app = express();
 
-app.use(cors());
+// Security
+app.use(helmet());
+app.use(
+  cors({
+    origin: env.CORS_ORIGIN,
+    credentials: true,
+  }),
+);
+
+// Rate limiting: 100 requests per 15 minutes per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
+
 app.use(express.json());
 
 // Routes
