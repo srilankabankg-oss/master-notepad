@@ -47,7 +47,10 @@ backend/
 - Route prefix: `/api/`
 - Validation: Zod schemas on request body
 - Error handling: AppError class + global error middleware
-- No authentication (MVP) — employee IDs passed in request body
+- Session-based authentication (express-session + PostgreSQL store, bcrypt passwords)
+- Two roles: `admin` and `employee` (role column, RBAC enforcement planned)
+- Auth endpoints: POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me
+- requireAuth middleware protects all routes; employeeId from session with body fallback
 
 ### Entities & Tables
 | Entity | Table | Description |
@@ -62,13 +65,14 @@ backend/
 | Surveys | `surveys` | Employee surveys with JSON questions |
 | SurveyResponses | `survey_responses` | Individual responses to surveys |
 | ContractorEvents | `contractor_events` | Event log: positive/violation/info entries |
+| AuditLog | `audit_log` | Change history: who changed what and when |
 
 ### Rating System
 - Reviews have `rating` field (integer, 1-10)
 - Subcontractor detail endpoint calculates average rating via SQL `AVG()`
 - Prepared for future AI evaluation
 
-### AI Assistant Integration (planned)
+### AI Assistant Integration
 
 The backend proxies requests to a separate Python/FastAPI microservice (port 3002) that provides RAG-based Q&A over system data.
 
@@ -92,8 +96,14 @@ On every CRUD operation (create/update/delete), the backend fires an async `POST
 **pgvector schema** (in same PostgreSQL, via extension):
 - Table `embeddings(id, entity_type, entity_id, chunk_index, content, embedding VECTOR(768), metadata JSONB)`
 - HNSW index on `embedding` with `vector_cosine_ops`
-- Embedding model: `intfloat/multilingual-e5-base` (768-dim, ONNX in prod)
-- Hybrid search: cosine similarity (0.7) + BM25 keyword (0.3)
+- Embedding model: `intfloat/multilingual-e5-base` (768-dim)
+
+Backend proxy attaches employeeId from session automatically (client sends only `question`).
+
+pgvector extension required. Embeddings table with HNSW index. Embedding model: intfloat/multilingual-e5-base (768-dim).
+LLM: OpenAI-compatible API via LLM_API_URL env var.
+
+Start AI service: `cd assistant && source venv/bin/activate && uvicorn src.main:app --port 3002`
 
 **LLM:** OpenAI-compatible API (`LLM_API_URL`, `LLM_MODEL` env vars), replaceable.
 
