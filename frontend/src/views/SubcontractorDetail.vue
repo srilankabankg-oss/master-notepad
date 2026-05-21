@@ -33,7 +33,7 @@ const error = ref('')
 const activeTab = ref<'reviews' | 'comments' | 'meetings' | 'surveys' | 'events'>('reviews')
 
 async function loadAll() {
-  await Promise.all([
+  const [fetched] = await Promise.all([
     subcontractorStore.fetchById(subId),
     reviewStore.fetchAll(subId),
     commentStore.fetchAll(subId),
@@ -42,7 +42,7 @@ async function loadAll() {
     eventStore.fetchAll(subId),
     employeeStore.fetchAll(),
   ])
-  sub.value = subcontractorStore.items.find(s => s.id === subId) || null
+  sub.value = fetched || null
 }
 
 onMounted(async () => {

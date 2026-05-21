@@ -21,7 +21,11 @@ export const useSubcontractorStore = defineStore('subcontractors', () => {
   }
 
   async function fetchById(id: number | string) {
-    return api.subcontractors.get(id)
+    const item = await api.subcontractors.get(id)
+    const idx = items.value.findIndex((s) => s.id === Number(id))
+    if (idx !== -1) items.value[idx] = item
+    else items.value.push(item)
+    return item
   }
 
   async function create(data: SubcontractorCreate) {
