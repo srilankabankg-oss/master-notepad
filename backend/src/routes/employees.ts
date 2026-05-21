@@ -47,7 +47,7 @@ employeesRouter.post('/', validateBody(createEmployeeSchema), async (req, res, n
 employeesRouter.put('/:id', validateBody(updateEmployeeSchema), async (req, res, next) => {
   try {
     const [employee] = await db.update(schema.employees)
-      .set(req.body)
+      .set({ ...req.body, updatedAt: new Date() })
       .where(eq(schema.employees.id, +req.params.id))
       .returning();
     if (!employee) throw new AppError(404, 'Employee not found');

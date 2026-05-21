@@ -45,7 +45,7 @@ suggestionsRouter.get('/:id', async (req, res, next) => {
 suggestionsRouter.patch('/:id', validateBody(updateSuggestionSchema), async (req, res, next) => {
   try {
     const [suggestion] = await db.update(schema.checklistSuggestions)
-      .set(req.body)
+      .set({ ...req.body, updatedAt: new Date() })
       .where(eq(schema.checklistSuggestions.id, +req.params.id))
       .returning();
     if (!suggestion) throw new AppError(404, 'Suggestion not found');

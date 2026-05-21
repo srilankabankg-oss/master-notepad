@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { calculateWeightedRating } from '../utils/rating.js';
+import { notifyReindex } from '../ai-reindex.js';
 
 export const subcontractorsRouter = Router();
 
@@ -53,6 +54,7 @@ subcontractorsRouter.get('/:id', async (req, res, next) => {
 subcontractorsRouter.post('/', validateBody(createSubcontractorSchema), async (req, res, next) => {
   try {
     const [sub] = await db.insert(schema.subcontractors).values(req.body).returning();
+    notifyReindex('subcontractor', sub.id);
     res.status(201).json(sub);
   } catch (e) { next(e); }
 });
@@ -60,10 +62,11 @@ subcontractorsRouter.post('/', validateBody(createSubcontractorSchema), async (r
 subcontractorsRouter.put('/:id', validateBody(updateSubcontractorSchema), async (req, res, next) => {
   try {
     const [sub] = await db.update(schema.subcontractors)
-      .set(req.body)
+      .set({ ...req.body, updatedAt: new Date() })
       .where(eq(schema.subcontractors.id, +req.params.id))
       .returning();
     if (!sub) throw new AppError(404, 'Subcontractor not found');
+    notifyReindex('subcontractor', sub.id);
     res.json(sub);
   } catch (e) { next(e); }
 });
@@ -72,6 +75,7 @@ subcontractorsRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.subcontractors).where(eq(schema.subcontractors.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Subcontractor not found');
+    notifyReindex('subcontractor', deleted.id);
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

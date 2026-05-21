@@ -4,6 +4,7 @@ import { db, schema } from '../db/index.js';
 import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { notifyReindex } from '../ai-reindex.js';
 
 export const commentsRouter = Router();
 
@@ -38,6 +39,7 @@ commentsRouter.get('/:id', async (req, res, next) => {
 commentsRouter.post('/', validateBody(createCommentSchema), async (req, res, next) => {
   try {
     const [comment] = await db.insert(schema.comments).values(req.body).returning();
+    notifyReindex('comment', comment.id);
     res.status(201).json(comment);
   } catch (e) { next(e); }
 });
@@ -45,10 +47,11 @@ commentsRouter.post('/', validateBody(createCommentSchema), async (req, res, nex
 commentsRouter.put('/:id', validateBody(updateCommentSchema), async (req, res, next) => {
   try {
     const [comment] = await db.update(schema.comments)
-      .set(req.body)
+      .set({ ...req.body, updatedAt: new Date() })
       .where(eq(schema.comments.id, +req.params.id))
       .returning();
     if (!comment) throw new AppError(404, 'Comment not found');
+    notifyReindex('comment', comment.id);
     res.json(comment);
   } catch (e) { next(e); }
 });
@@ -57,6 +60,7 @@ commentsRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.comments).where(eq(schema.comments.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Comment not found');
+    notifyReindex('comment', deleted.id);
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

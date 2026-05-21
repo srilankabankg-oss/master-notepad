@@ -4,6 +4,7 @@ import { db, schema } from '../db/index.js';
 import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { notifyReindex } from '../ai-reindex.js';
 
 export const meetingsRouter = Router();
 
@@ -43,6 +44,7 @@ meetingsRouter.post('/', validateBody(createMeetingSchema), async (req, res, nex
       ...req.body,
       date: new Date(req.body.date),
     }).returning();
+    notifyReindex('meeting', meeting.id);
     res.status(201).json(meeting);
   } catch (e) { next(e); }
 });
@@ -52,10 +54,11 @@ meetingsRouter.put('/:id', validateBody(updateMeetingSchema), async (req, res, n
     const data = { ...req.body };
     if (data.date) data.date = new Date(data.date);
     const [meeting] = await db.update(schema.meetingProtocols)
-      .set(data)
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(schema.meetingProtocols.id, +req.params.id))
       .returning();
     if (!meeting) throw new AppError(404, 'Meeting protocol not found');
+    notifyReindex('meeting', meeting.id);
     res.json(meeting);
   } catch (e) { next(e); }
 });
@@ -64,6 +67,7 @@ meetingsRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.meetingProtocols).where(eq(schema.meetingProtocols.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Meeting protocol not found');
+    notifyReindex('meeting', deleted.id);
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

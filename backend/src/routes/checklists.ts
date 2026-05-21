@@ -4,6 +4,7 @@ import { db, schema } from '../db/index.js';
 import { eq, and } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { notifyReindex } from '../ai-reindex.js';
 
 export const checklistsRouter = Router();
 
@@ -57,6 +58,7 @@ checklistsRouter.get('/:id', async (req, res, next) => {
 checklistsRouter.post('/', validateBody(createChecklistSchema), async (req, res, next) => {
   try {
     const [checklist] = await db.insert(schema.checklists).values(req.body).returning();
+    notifyReindex('checklist', checklist.id);
     res.status(201).json(checklist);
   } catch (e) { next(e); }
 });
@@ -64,10 +66,11 @@ checklistsRouter.post('/', validateBody(createChecklistSchema), async (req, res,
 checklistsRouter.put('/:id', validateBody(updateChecklistSchema), async (req, res, next) => {
   try {
     const [checklist] = await db.update(schema.checklists)
-      .set(req.body)
+      .set({ ...req.body, updatedAt: new Date() })
       .where(eq(schema.checklists.id, +req.params.id))
       .returning();
     if (!checklist) throw new AppError(404, 'Checklist not found');
+    notifyReindex('checklist', checklist.id);
     res.json(checklist);
   } catch (e) { next(e); }
 });
@@ -76,6 +79,7 @@ checklistsRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.checklists).where(eq(schema.checklists.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Checklist not found');
+    notifyReindex('checklist', deleted.id);
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });
