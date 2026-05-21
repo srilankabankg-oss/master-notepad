@@ -9,6 +9,7 @@ err()  { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 ASSISTANT_DIR="$PROJECT_DIR/assistant"
 BACKEND_DIR="$PROJECT_DIR/backend"
+FRONTEND_DIR="$PROJECT_DIR/frontend"
 PG_CONTAINER="master-notepad-pg"
 PG_IMAGE="pgvector/pgvector:pg16"
 PG_PORT=5433
@@ -41,6 +42,13 @@ fi
 
 log "Prerequisites OK"
 
+# ── 1.5. Install dependencies ──
+echo ""
+log "Installing Node.js dependencies..."
+cd "$PROJECT_DIR"
+npm install
+log "Dependencies installed"
+
 # ── 2. PostgreSQL + pgvector ──
 echo ""
 log "Setting up PostgreSQL with pgvector..."
@@ -51,11 +59,11 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${PG_CONTAINER}$"; then
         warn "Old container uses $OLD_IMAGE — migrating to $PG_IMAGE"
         log "Backing up data..."
         docker exec "$PG_CONTAINER" pg_dump -U "$PG_USER" -d "$PG_DB" -Fc > /tmp/pg_backup.dump 2>/dev/null || warn "No data to backup (fresh DB)"
-        
+
         log "Removing old container..."
         docker stop "$PG_CONTAINER" 2>/dev/null || true
         docker rm "$PG_CONTAINER" 2>/dev/null || true
-        
+
         log "Starting pgvector container..."
         docker run -d \
             --name "$PG_CONTAINER" \
@@ -64,7 +72,7 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${PG_CONTAINER}$"; then
             -e POSTGRES_DB="$PG_DB" \
             -p "$PG_PORT":5432 \
             "$PG_IMAGE" > /dev/null
-        
+
         log "Waiting for PostgreSQL..."
         for i in $(seq 1 30); do
             if docker exec "$PG_CONTAINER" pg_isready -U "$PG_USER" >/dev/null 2>&1; then
@@ -72,7 +80,7 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${PG_CONTAINER}$"; then
             fi
             sleep 1
         done
-        
+
         if [ -f /tmp/pg_backup.dump ]; then
             log "Restoring data..."
             docker exec -i "$PG_CONTAINER" pg_restore -U "$PG_USER" -d "$PG_DB" < /tmp/pg_backup.dump 2>/dev/null || warn "Restore had warnings (may be empty DB)"
@@ -92,7 +100,7 @@ else
         -e POSTGRES_DB="$PG_DB" \
         -p "$PG_PORT":5432 \
         "$PG_IMAGE" > /dev/null
-    
+
     log "Waiting for PostgreSQL..."
     for i in $(seq 1 30); do
         if docker exec "$PG_CONTAINER" pg_isready -U "$PG_USER" >/dev/null 2>&1; then
@@ -125,25 +133,31 @@ log "Python dependencies installed"
 # ── 4. Pre-download embedding model ──
 echo ""
 log "Pre-downloading embedding model (multilingual-e5-base, ~1.1 GB)..."
-python3 -c "
-from sentence_transformers import SentenceTransformer
-print('  Downloading...')
-model = SentenceTransformer('intfloat/multilingual-e5-base')
-print('  Model loaded. Testing...')
-emb = model.encode(['query: test'])
-print(f'  Embedding dim: {len(emb[0])}')
-print('  Model ready.')
-" || warn "Model download failed — will retry on first request"
+# Skipped on deploy — model will be downloaded on first AI request to keep deploy fast
+warn "Model pre-download skipped — will download on first AI request"
 
 # ── 5. Backend env check ──
 echo ""
 log "Checking backend environment..."
 if [ ! -f "$BACKEND_DIR/.env" ]; then
     cp "$BACKEND_DIR/.env.example" "$BACKEND_DIR/.env"
-    warn "Created backend/.env from .env.example — verify DATABASE_URL"
+    warn "Created backend/.env from .env.example — verify DATABASE_URL and SESSION_SECRET"
 fi
 
-# ── 6. Start backend ──
+# Ensure SESSION_SECRET is set
+if ! grep -q '^SESSION_SECRET=' "$BACKEND_DIR/.env" 2>/dev/null; then
+    echo "SESSION_SECRET=$(openssl rand -hex 32)" >> "$BACKEND_DIR/.env"
+    log "Added SESSION_SECRET to backend/.env"
+fi
+
+# ── 6. Build frontend ──
+echo ""
+log "Building frontend..."
+cd "$PROJECT_DIR"
+npm run build -w frontend
+log "Frontend built"
+
+# ── 7. Start backend ──
 echo ""
 log "Starting backend (port $BACKEND_PORT)..."
 
@@ -164,7 +178,7 @@ else
     err "Backend failed to start — check /tmp/backend.log"
 fi
 
-# ── 7. Start AI microservice ──
+# ── 8. Start AI microservice ──
 echo ""
 log "Starting AI microservice (port $AI_PORT)..."
 
@@ -190,7 +204,7 @@ else
     cat /tmp/ai-service.log | tail -5
 fi
 
-# ── 8. Verification ──
+# ── 9. Verification ──
 echo ""
 echo "================================================"
 echo "  Verification"
@@ -199,6 +213,10 @@ echo "================================================"
 log "Testing backend health..."
 BACKEND_HEALTH=$(curl -s http://localhost:$BACKEND_PORT/api/health 2>/dev/null || echo '{"status":"down"}')
 echo "  Backend: $BACKEND_HEALTH"
+
+log "Testing auth endpoint..."
+AUTH_HEALTH=$(curl -s http://localhost:$BACKEND_PORT/api/auth/health 2>/dev/null || echo '{"status":"down"}')
+echo "  Auth: $AUTH_HEALTH"
 
 log "Testing AI microservice health..."
 AI_HEALTH=$(curl -s http://localhost:$AI_PORT/api/ai/health 2>/dev/null || echo '{"status":"down"}')
@@ -217,19 +235,20 @@ if echo "$AI_HEALTH" | grep -q '"status":"ok"'; then
     ASK_RESULT=$(curl -s -X POST http://localhost:$AI_PORT/api/ai/ask \
         -H 'Content-Type: application/json' \
         -d '{"question":"Какие подрядчики есть в системе?","limit":3}' 2>/dev/null || echo '{"error":"failed"}')
-    echo "  Ask: $(echo "$ASK_RESULT" | python3 -c 'import sys,json; d=json.load(sys.stdin); print(f\"answer={d.get(\"answer\",\"?\")[:100]}... confidence={d.get(\"confidence\",\"?\")}\")' 2>/dev/null || echo '  Ask: failed to parse')"
+    echo "  Ask: $(echo "$ASK_RESULT" | python3 -c 'import sys,json; d=json.load(sys.stdin); print(f"answer={d.get(\"answer\",\"?\")[:100]}... confidence={d.get(\"confidence\",\"?\")}")' 2>/dev/null || echo '  Ask: failed to parse')"
 else
     warn "AI service not healthy — check /tmp/ai-service.log"
     echo "  Last 10 lines:"
     tail -10 /tmp/ai-service.log 2>/dev/null || echo "  (no log)"
 fi
 
-# ── 9. Summary ──
+# ── 10. Summary ──
 echo ""
 echo "================================================"
 echo "  Deployment Complete"
 echo "================================================"
 echo ""
+echo "  Frontend:      http://localhost:$FRONTEND_PORT"
 echo "  Backend:       http://localhost:$BACKEND_PORT"
 echo "  AI Service:    http://localhost:$AI_PORT"
 echo "  AI Proxy:      http://localhost:$BACKEND_PORT/api/ai"
