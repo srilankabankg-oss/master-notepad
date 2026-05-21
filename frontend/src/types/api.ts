@@ -183,7 +183,6 @@ export interface ContractorEvent {
   description: string
   eventDate: string
   createdAt: string
-  updatedAt: string
 }
 
 export interface ContractorEventCreate {
