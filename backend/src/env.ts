@@ -7,6 +7,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   AI_SERVICE_URL: z.string().default('http://localhost:3002'),
+  SESSION_SECRET: z.string().min(32),
 });
 
 const parsed = envSchema.safeParse(process.env);
