@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { db, schema } from '../db/index.js';
 import { eq, count, and } from 'drizzle-orm';
 import { AppError } from '../middleware/error-handler.js';
+import { calculateWeightedRating } from '../utils/rating.js';
 
 export const tenderRouter = Router();
 
@@ -17,44 +18,35 @@ tenderRouter.get('/:id/summary', async (req, res, next) => {
 
     if (!subcontractor) throw new AppError(404, 'Subcontractor not found');
 
-    const reviews = await db
-      .select()
-      .from(schema.reviews)
-      .where(eq(schema.reviews.subcontractorId, id));
+    const [
+      reviews,
+      events,
+      meetings,
+      comments,
+      [{ surveysCount }],
+      [{ violationsCount }],
+    ] = await Promise.all([
+      db.select().from(schema.reviews).where(eq(schema.reviews.subcontractorId, id)),
+      db.select().from(schema.contractorEvents).where(eq(schema.contractorEvents.subcontractorId, id)),
+      db.select().from(schema.meetingProtocols).where(eq(schema.meetingProtocols.subcontractorId, id)),
+      db.select().from(schema.comments).where(eq(schema.comments.subcontractorId, id)),
+      db.select({ surveysCount: count() }).from(schema.surveys).where(eq(schema.surveys.subcontractorId, id)),
+      db.select({ violationsCount: count() })
+        .from(schema.contractorEvents)
+        .where(and(
+          eq(schema.contractorEvents.subcontractorId, id),
+          eq(schema.contractorEvents.type, 'violation'),
+        )),
+    ]);
 
-    const events = await db
-      .select()
-      .from(schema.contractorEvents)
-      .where(eq(schema.contractorEvents.subcontractorId, id));
-
-    const meetings = await db
-      .select()
-      .from(schema.meetingProtocols)
-      .where(eq(schema.meetingProtocols.subcontractorId, id));
-
-    const comments = await db
-      .select()
-      .from(schema.comments)
-      .where(eq(schema.comments.subcontractorId, id));
-
-    const [{ surveysCount }] = await db
-      .select({ surveysCount: count() })
-      .from(schema.surveys)
-      .where(eq(schema.surveys.subcontractorId, id));
-
-    const [{ violationsCount }] = await db
-      .select({ violationsCount: count() })
-      .from(schema.contractorEvents)
-      .where(and(
-        eq(schema.contractorEvents.subcontractorId, id),
-        eq(schema.contractorEvents.type, 'violation'),
-      ));
+    const rating = calculateWeightedRating(
+      reviews,
+      events.map((e) => e.type),
+    );
 
     res.json({
       subcontractor,
-      rating: reviews.length
-        ? +((reviews as any[]).reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
-        : 0,
+      rating,
       reviews,
       events,
       meetings,
