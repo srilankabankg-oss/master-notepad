@@ -13,6 +13,7 @@ import { surveysRouter } from './routes/surveys.js';
 import { employeesRouter } from './routes/employees.js';
 import { eventsRouter } from './routes/events.js';
 import { tenderRouter } from './routes/tender.js';
+import { aiRouter } from './routes/ai.js';
 import { errorHandler } from './middleware/error-handler.js';
 
 export const app = express();
@@ -35,7 +36,7 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Routes
 app.use('/api/employees', employeesRouter);
@@ -48,6 +49,7 @@ app.use('/api/meetings', meetingsRouter);
 app.use('/api/surveys', surveysRouter);
 app.use('/api/tender', tenderRouter);
 app.use('/api/events', eventsRouter);
+app.use('/api/ai', aiRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
