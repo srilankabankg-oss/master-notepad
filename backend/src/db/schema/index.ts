@@ -5,6 +5,7 @@ import { relations } from 'drizzle-orm';
 export const suggestionStatusEnum = pgEnum('suggestion_status', ['pending', 'approved', 'rejected']);
 export const checklistTypeEnum = pgEnum('checklist_type', ['organization', 'personal']);
 export const eventTypeEnum = pgEnum('event_type', ['positive', 'violation', 'info']);
+export const auditActionEnum = pgEnum('audit_action', ['create', 'update', 'delete']);
 
 // ── Employees ──
 export const employees = pgTable('employees', {
@@ -12,6 +13,8 @@ export const employees = pgTable('employees', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   position: varchar('position', { length: 255 }),
+  passwordHash: varchar('password_hash', { length: 255 }),
+  role: varchar('role', { length: 50 }).notNull().default('employee'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -116,6 +119,17 @@ export const surveyResponses = pgTable('survey_responses', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// ── Audit Log ──
+export const auditLog = pgTable('audit_log', {
+  id: serial('id').primaryKey(),
+  entityType: varchar('entity_type', { length: 50 }).notNull(),
+  entityId: integer('entity_id').notNull(),
+  employeeId: integer('employee_id').references(() => employees.id, { onDelete: 'set null' }),
+  action: auditActionEnum('action').notNull(),
+  changes: jsonb('changes').$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 // ── Relations ──
 export const employeesRelations = relations(employees, ({ many }) => ({
   reviews: many(reviews),
@@ -125,6 +139,7 @@ export const employeesRelations = relations(employees, ({ many }) => ({
   surveys: many(surveys, { relationName: 'createdSurveys' }),
   responses: many(surveyResponses),
   events: many(contractorEvents),
+  auditLogs: many(auditLog),
 }));
 
 export const subcontractorsRelations = relations(subcontractors, ({ many }) => ({
@@ -173,4 +188,8 @@ export const surveyResponsesRelations = relations(surveyResponses, ({ one }) => 
 export const contractorEventsRelations = relations(contractorEvents, ({ one }) => ({
   subcontractor: one(subcontractors, { fields: [contractorEvents.subcontractorId], references: [subcontractors.id] }),
   employee: one(employees, { fields: [contractorEvents.employeeId], references: [employees.id] }),
+}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  employee: one(employees, { fields: [auditLog.employeeId], references: [employees.id] }),
 }));
