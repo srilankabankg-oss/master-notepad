@@ -5,12 +5,15 @@ import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { notifyReindex } from '../ai-reindex.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const eventsRouter = Router();
 
+eventsRouter.use(requireAuth);
+
 const createEventSchema = z.object({
   subcontractorId: z.number().int().positive(),
-  employeeId: z.number().int().positive(),
   type: z.enum(['positive', 'violation', 'info']),
   description: z.string().min(1),
   eventDate: z.string().datetime(),
@@ -18,7 +21,6 @@ const createEventSchema = z.object({
 
 const updateEventSchema = z.object({
   subcontractorId: z.number().int().positive().optional(),
-  employeeId: z.number().int().positive().optional(),
   type: z.enum(['positive', 'violation', 'info']).optional(),
   description: z.string().min(1).optional(),
   eventDate: z.string().datetime().optional(),
@@ -26,7 +28,6 @@ const updateEventSchema = z.object({
 
 const suggestSchema = z.object({
   checklistId: z.number().int().positive(),
-  employeeId: z.number().int().positive(),
 });
 
 eventsRouter.get('/', async (req, res, next) => {
@@ -49,11 +50,14 @@ eventsRouter.get('/:id', async (req, res, next) => {
 
 eventsRouter.post('/', validateBody(createEventSchema), async (req, res, next) => {
   try {
+    const employeeId = getEmployeeId(req)!;
     const [event] = await db.insert(schema.contractorEvents).values({
       ...req.body,
+      employeeId,
       eventDate: new Date(req.body.eventDate),
     }).returning();
     notifyReindex('event', event.id);
+    await auditLog({ entityType: 'event', entityId: event.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(event);
   } catch (e) { next(e); }
 });
@@ -68,6 +72,7 @@ eventsRouter.put('/:id', validateBody(updateEventSchema), async (req, res, next)
       .returning();
     if (!event) throw new AppError(404, 'Event not found');
     notifyReindex('event', event.id);
+    await auditLog({ entityType: 'event', entityId: event.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(event);
   } catch (e) { next(e); }
 });
@@ -77,6 +82,7 @@ eventsRouter.delete('/:id', async (req, res, next) => {
     const [deleted] = await db.delete(schema.contractorEvents).where(eq(schema.contractorEvents.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Event not found');
     notifyReindex('event', deleted.id);
+    await auditLog({ entityType: 'event', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });
@@ -88,9 +94,10 @@ eventsRouter.post('/:id/suggest', validateBody(suggestSchema), async (req, res, 
 
     const [suggestion] = await db.insert(schema.checklistSuggestions).values({
       checklistId: req.body.checklistId,
-      employeeId: req.body.employeeId,
+      employeeId: getEmployeeId(req)!,
       suggestion: eventResult[0].description,
     }).returning();
+    await auditLog({ entityType: 'suggestion', entityId: suggestion.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { checklistId: req.body.checklistId, fromEventId: +req.params.id } });
     res.status(201).json(suggestion);
   } catch (e) { next(e); }
 });

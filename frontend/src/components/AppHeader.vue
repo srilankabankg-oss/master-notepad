@@ -5,17 +5,22 @@ import { computed } from 'vue'
 const route = useRoute()
 
 const pageTitle = computed(() => {
-  const titles: Record<string, string> = {
-    subcontractors: 'Подрядчики',
-    'subcontractor-detail': 'Карточка подрядчика',
-    reviews: 'Отзывы',
-    checklists: 'Чек-листы',
-    meetings: 'Протоколы встреч',
-    surveys: 'Опросы',
-    'tender-summary': 'Тендерная справка',
-  }
-  return titles[route.name as string] || ''
-})
+    const titles: Record<string, string> = {
+      subcontractors: 'Подрядчики',
+      'subcontractor-detail': 'Карточка подрядчика',
+      reviews: 'Отзывы',
+      checklists: 'Чек-листы',
+      meetings: 'Протоколы встреч',
+      surveys: 'Опросы',
+      'tender-summary': 'Тендерная справка',
+      employees: 'Сотрудники',
+      suggestions: 'Предложения',
+      events: 'События',
+      chat: 'Ассистент',
+      'audit-log': 'Журнал изменений',
+    }
+    return titles[route.name as string] || ''
+  })
 </script>
 
 <template>

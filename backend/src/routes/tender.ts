@@ -3,8 +3,11 @@ import { db, schema } from '../db/index.js';
 import { eq, count, and } from 'drizzle-orm';
 import { AppError } from '../middleware/error-handler.js';
 import { calculateWeightedRating } from '../utils/rating.js';
+import { requireAuth } from '../middleware/auth.js';
 
 export const tenderRouter = Router();
+
+tenderRouter.use(requireAuth);
 
 tenderRouter.get('/:id/summary', async (req, res, next) => {
   try {

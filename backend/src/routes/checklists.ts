@@ -5,8 +5,12 @@ import { eq, and } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { notifyReindex } from '../ai-reindex.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const checklistsRouter = Router();
+
+checklistsRouter.use(requireAuth);
 
 const checklistItemSchema = z.object({ text: z.string().min(1), completed: z.boolean().default(false) });
 
@@ -59,6 +63,7 @@ checklistsRouter.post('/', validateBody(createChecklistSchema), async (req, res,
   try {
     const [checklist] = await db.insert(schema.checklists).values(req.body).returning();
     notifyReindex('checklist', checklist.id);
+    await auditLog({ entityType: 'checklist', entityId: checklist.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(checklist);
   } catch (e) { next(e); }
 });
@@ -71,6 +76,7 @@ checklistsRouter.put('/:id', validateBody(updateChecklistSchema), async (req, re
       .returning();
     if (!checklist) throw new AppError(404, 'Checklist not found');
     notifyReindex('checklist', checklist.id);
+    await auditLog({ entityType: 'checklist', entityId: checklist.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(checklist);
   } catch (e) { next(e); }
 });
@@ -80,6 +86,7 @@ checklistsRouter.delete('/:id', async (req, res, next) => {
     const [deleted] = await db.delete(schema.checklists).where(eq(schema.checklists.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Checklist not found');
     notifyReindex('checklist', deleted.id);
+    await auditLog({ entityType: 'checklist', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

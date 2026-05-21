@@ -5,8 +5,12 @@ import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { notifyReindex } from '../ai-reindex.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const meetingsRouter = Router();
+
+meetingsRouter.use(requireAuth);
 
 const createMeetingSchema = z.object({
   title: z.string().min(1).max(500),
@@ -45,6 +49,7 @@ meetingsRouter.post('/', validateBody(createMeetingSchema), async (req, res, nex
       date: new Date(req.body.date),
     }).returning();
     notifyReindex('meeting', meeting.id);
+    await auditLog({ entityType: 'meeting', entityId: meeting.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(meeting);
   } catch (e) { next(e); }
 });
@@ -59,6 +64,7 @@ meetingsRouter.put('/:id', validateBody(updateMeetingSchema), async (req, res, n
       .returning();
     if (!meeting) throw new AppError(404, 'Meeting protocol not found');
     notifyReindex('meeting', meeting.id);
+    await auditLog({ entityType: 'meeting', entityId: meeting.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(meeting);
   } catch (e) { next(e); }
 });
@@ -68,6 +74,7 @@ meetingsRouter.delete('/:id', async (req, res, next) => {
     const [deleted] = await db.delete(schema.meetingProtocols).where(eq(schema.meetingProtocols.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Meeting protocol not found');
     notifyReindex('meeting', deleted.id);
+    await auditLog({ entityType: 'meeting', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

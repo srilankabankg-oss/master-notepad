@@ -4,12 +4,15 @@ import { db, schema } from '../db/index.js';
 import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const suggestionsRouter = Router();
 
+suggestionsRouter.use(requireAuth);
+
 const createSuggestionSchema = z.object({
   checklistId: z.number().int().positive(),
-  employeeId: z.number().int().positive(),
   suggestion: z.string().min(1),
 });
 
@@ -29,7 +32,9 @@ suggestionsRouter.get('/', async (req, res, next) => {
 
 suggestionsRouter.post('/', validateBody(createSuggestionSchema), async (req, res, next) => {
   try {
-    const [suggestion] = await db.insert(schema.checklistSuggestions).values(req.body).returning();
+    const employeeId = getEmployeeId(req);
+    const [suggestion] = await db.insert(schema.checklistSuggestions).values({ ...req.body, employeeId }).returning();
+    await auditLog({ entityType: 'suggestion', entityId: suggestion.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(suggestion);
   } catch (e) { next(e); }
 });
@@ -49,6 +54,7 @@ suggestionsRouter.patch('/:id', validateBody(updateSuggestionSchema), async (req
       .where(eq(schema.checklistSuggestions.id, +req.params.id))
       .returning();
     if (!suggestion) throw new AppError(404, 'Suggestion not found');
+    await auditLog({ entityType: 'suggestion', entityId: suggestion.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(suggestion);
   } catch (e) { next(e); }
 });
@@ -57,6 +63,7 @@ suggestionsRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.checklistSuggestions).where(eq(schema.checklistSuggestions.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Suggestion not found');
+    await auditLog({ entityType: 'suggestion', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

@@ -1,0 +1,41 @@
+services:
+  pg:
+    image: pgvector/pgvector:pg16
+    container_name: master-notepad-pg
+    ports: ["5433:5432"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: master_notepad
+    volumes: [pgdata:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports: ["3001:3001"]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@pg:5432/master_notepad
+      SESSION_SECRET: dev-secret-change-in-production
+      AI_SERVICE_URL: http://assistant:3002
+      CORS_ORIGIN: http://localhost:5173
+      PORT: 3001
+    depends_on: [pg]
+    restart: unless-stopped
+
+  assistant:
+    build: ./assistant
+    ports: ["3002:3002"]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@pg:5432/master_notepad
+      MAIN_API_URL: http://backend:3001
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      LLM_MODEL: step-3.5-flash
+      PORT: 3002
+    deploy:
+      resources:
+        limits: { memory: 2G }
+        reservations: { memory: 1G }
+    restart: unless-stopped
+
+volumes:
+  pgdata:

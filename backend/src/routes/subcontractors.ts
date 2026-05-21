@@ -6,8 +6,12 @@ import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { calculateWeightedRating } from '../utils/rating.js';
 import { notifyReindex } from '../ai-reindex.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const subcontractorsRouter = Router();
+
+subcontractorsRouter.use(requireAuth);
 
 const createSubcontractorSchema = z.object({
   name: z.string().min(1).max(255),
@@ -55,6 +59,7 @@ subcontractorsRouter.post('/', validateBody(createSubcontractorSchema), async (r
   try {
     const [sub] = await db.insert(schema.subcontractors).values(req.body).returning();
     notifyReindex('subcontractor', sub.id);
+    await auditLog({ entityType: 'subcontractor', entityId: sub.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(sub);
   } catch (e) { next(e); }
 });
@@ -67,6 +72,7 @@ subcontractorsRouter.put('/:id', validateBody(updateSubcontractorSchema), async 
       .returning();
     if (!sub) throw new AppError(404, 'Subcontractor not found');
     notifyReindex('subcontractor', sub.id);
+    await auditLog({ entityType: 'subcontractor', entityId: sub.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(sub);
   } catch (e) { next(e); }
 });
@@ -76,6 +82,7 @@ subcontractorsRouter.delete('/:id', async (req, res, next) => {
     const [deleted] = await db.delete(schema.subcontractors).where(eq(schema.subcontractors.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Subcontractor not found');
     notifyReindex('subcontractor', deleted.id);
+    await auditLog({ entityType: 'subcontractor', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

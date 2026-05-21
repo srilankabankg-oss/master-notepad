@@ -26,6 +26,8 @@ const navItems = [
   { to: '/employees', label: 'Сотрудники', name: 'employees' },
   { to: '/suggestions', label: 'Предложения', name: 'suggestions' },
   { to: '/events', label: 'События', name: 'events' },
+  { to: '/chat', label: 'Ассистент', name: 'chat' },
+  { to: '/audit-log', label: 'Журнал изменений', name: 'audit-log' },
   { to: '/tender/1', label: 'Тендерная справка', name: 'tender-summary' },
 ]
 

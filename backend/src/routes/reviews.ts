@@ -5,12 +5,15 @@ import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { notifyReindex } from '../ai-reindex.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const reviewsRouter = Router();
 
+reviewsRouter.use(requireAuth);
+
 const createReviewSchema = z.object({
   subcontractorId: z.number().int().positive(),
-  employeeId: z.number().int().positive(),
   content: z.string().min(1),
   rating: z.number().int().min(1).max(10),
 });
@@ -40,8 +43,10 @@ reviewsRouter.get('/:id', async (req, res, next) => {
 
 reviewsRouter.post('/', validateBody(createReviewSchema), async (req, res, next) => {
   try {
-    const [review] = await db.insert(schema.reviews).values(req.body).returning();
+    const employeeId = getEmployeeId(req);
+    const [review] = await db.insert(schema.reviews).values({ ...req.body, employeeId }).returning();
     notifyReindex('review', review.id);
+    await auditLog({ entityType: 'review', entityId: review.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(review);
   } catch (e) { next(e); }
 });
@@ -54,6 +59,7 @@ reviewsRouter.put('/:id', validateBody(updateReviewSchema), async (req, res, nex
       .returning();
     if (!review) throw new AppError(404, 'Review not found');
     notifyReindex('review', review.id);
+    await auditLog({ entityType: 'review', entityId: review.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(review);
   } catch (e) { next(e); }
 });
@@ -63,6 +69,7 @@ reviewsRouter.delete('/:id', async (req, res, next) => {
     const [deleted] = await db.delete(schema.reviews).where(eq(schema.reviews.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Review not found');
     notifyReindex('review', deleted.id);
+    await auditLog({ entityType: 'review', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

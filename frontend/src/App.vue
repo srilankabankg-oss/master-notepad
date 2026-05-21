@@ -1,10 +1,16 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppHeader from '@/components/AppHeader.vue'
+
+const auth = useAuthStore()
 </script>
 
 <template>
-  <div class="app-layout">
+  <div v-if="!auth.isAuthenticated" class="auth-layout">
+    <router-view />
+  </div>
+  <div v-else class="app-layout">
     <AppSidebar />
     <div class="app-main">
       <AppHeader />
@@ -25,6 +31,11 @@ import AppHeader from '@/components/AppHeader.vue'
 </style>
 
 <style scoped>
+.auth-layout {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
 .app-layout {
   display: flex;
   min-height: 100vh;

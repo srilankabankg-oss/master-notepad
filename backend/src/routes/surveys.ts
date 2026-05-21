@@ -5,8 +5,12 @@ import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
 import { notifyReindex } from '../ai-reindex.js';
+import { requireAuth, getEmployeeId } from '../middleware/auth.js';
+import { auditLog } from '../middleware/audit.js';
 
 export const surveysRouter = Router();
+
+surveysRouter.use(requireAuth);
 
 const defaultQuestions = [
   'Оцените качество работ подрядчика',
@@ -19,7 +23,6 @@ const defaultQuestions = [
 const createSurveySchema = z.object({
   title: z.string().min(1).max(500),
   subcontractorId: z.number().int().positive(),
-  createdBy: z.number().int().positive(),
   questions: z.array(z.string()).default(defaultQuestions),
 });
 
@@ -49,8 +52,10 @@ surveysRouter.get('/:id', async (req, res, next) => {
 
 surveysRouter.post('/', validateBody(createSurveySchema), async (req, res, next) => {
   try {
-    const [survey] = await db.insert(schema.surveys).values(req.body).returning();
+    const createdBy = getEmployeeId(req);
+    const [survey] = await db.insert(schema.surveys).values({ ...req.body, createdBy }).returning();
     notifyReindex('survey', survey.id);
+    await auditLog({ entityType: 'survey', entityId: survey.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(survey);
   } catch (e) { next(e); }
 });
@@ -63,20 +68,22 @@ surveysRouter.put('/:id', validateBody(updateSurveySchema), async (req, res, nex
       .returning();
     if (!survey) throw new AppError(404, 'Survey not found');
     notifyReindex('survey', survey.id);
+    await auditLog({ entityType: 'survey', entityId: survey.id, employeeId: getEmployeeId(req)!, action: 'update', changes: { ...req.body } });
     res.json(survey);
   } catch (e) { next(e); }
 });
 
 surveysRouter.post('/:id/respond', validateBody(z.object({
-  employeeId: z.number().int().positive(),
   answers: z.record(z.string(), z.string()),
 })), async (req, res, next) => {
   try {
+    const employeeId = getEmployeeId(req);
     const [response] = await db.insert(schema.surveyResponses).values({
       surveyId: +req.params.id,
-      employeeId: req.body.employeeId,
+      employeeId: getEmployeeId(req)!,
       answers: req.body.answers,
     }).returning();
+    await auditLog({ entityType: 'survey_response', entityId: response.id, employeeId: getEmployeeId(req)!, action: 'create', changes: { ...req.body } });
     res.status(201).json(response);
   } catch (e) { next(e); }
 });
@@ -94,6 +101,7 @@ surveysRouter.delete('/:id', async (req, res, next) => {
     const [deleted] = await db.delete(schema.surveys).where(eq(schema.surveys.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Survey not found');
     notifyReindex('survey', deleted.id);
+    await auditLog({ entityType: 'survey', entityId: deleted.id, employeeId: getEmployeeId(req)!, action: 'delete' });
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

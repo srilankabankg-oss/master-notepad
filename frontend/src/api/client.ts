@@ -9,6 +9,9 @@ import type {
   Survey, SurveyCreate,
   SurveyResponse, SurveyResponseCreate,
   ContractorEvent, ContractorEventCreate, TenderSummary,
+  LoginRequest, RegisterRequest, AuthEmployee,
+  AskRequest, AskResponse,
+  AuditLogEntry,
 } from '@/types/api'
 
 const BASE_URL = '/api'
@@ -30,6 +33,7 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
@@ -178,6 +182,26 @@ export const api = {
 
   tender: {
     summary: (id: number) => request<TenderSummary>(`/tender/${id}/summary`),
+  },
+
+  auth: {
+    login: (data: LoginRequest) =>
+      request<AuthEmployee>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+    register: (data: RegisterRequest) =>
+      request<AuthEmployee>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+    logout: () => request<void>('/auth/logout', { method: 'POST' }),
+    me: () => request<AuthEmployee>('/auth/me'),
+  },
+
+  ai: {
+    ask: (data: AskRequest) =>
+      request<AskResponse>('/ai/ask', { method: 'POST', body: JSON.stringify(data) }),
+    health: () => request<{ status: string }>('/ai/health'),
+  },
+
+  audit: {
+    list: (entityType?: string, entityId?: number) =>
+      request<AuditLogEntry[]>(`/audit-log${qs({ entityType, entityId })}`),
   },
 }
 

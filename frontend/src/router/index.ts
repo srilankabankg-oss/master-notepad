@@ -1,9 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const publicRoutes = ['/login', '/register']
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', redirect: '/subcontractors' },
+    { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
+    { path: '/register', name: 'register', component: () => import('@/views/RegisterView.vue') },
     {
       path: '/subcontractors',
       name: 'subcontractors',
@@ -54,7 +59,31 @@ const router = createRouter({
       name: 'events',
       component: () => import('@/views/EventsView.vue'),
     },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('@/views/ChatView.vue'),
+    },
+    {
+      path: '/audit-log',
+      name: 'audit-log',
+      component: () => import('@/views/AuditLogView.vue'),
+    },
   ],
+})
+
+router.beforeEach(async (to, _from, next) => {
+  const auth = useAuthStore()
+  if (!auth.user) {
+    await auth.fetchMe()
+  }
+  if (!auth.isAuthenticated && !publicRoutes.includes(to.path)) {
+    next('/login')
+  } else if (auth.isAuthenticated && publicRoutes.includes(to.path)) {
+    next('/subcontractors')
+  } else {
+    next()
+  }
 })
 
 export default router

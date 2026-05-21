@@ -208,3 +208,50 @@ export interface TenderSummary {
   surveysCount: number
   violationsCount: number
 }
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegisterRequest {
+  name: string
+  email: string
+  password: string
+  position?: string
+}
+
+export interface AuthEmployee {
+  id: number
+  name: string
+  email: string
+  position: string | null
+  role: string
+}
+
+export interface AskRequest {
+  question: string
+  limit?: number
+}
+
+export interface AskResponse {
+  answer: string
+  sources: Array<{
+    entityType: string
+    entityId: number
+    title: string
+    excerpt: string
+  }>
+  confidence: number
+}
+
+export interface AuditLogEntry {
+  id: number
+  entityType: string
+  entityId: number
+  action: string
+  employeeId: number | null
+  employeeName: string | null
+  changes: Record<string, unknown>
+  createdAt: string
+}
