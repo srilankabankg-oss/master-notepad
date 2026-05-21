@@ -13,7 +13,18 @@ backend/
 │   │   ├── index.ts      # Drizzle connection + pool
 │   │   └── schema/
 │   │       └── index.ts  # All database tables, relations, enums
-│   ├── routes/           # Route handlers (one file per entity)
+│   ├── routes/           # Route handlers (one file per entity) + AI proxy
+│   │   ├── employees.ts
+│   │   ├── subcontractors.ts
+│   │   ├── reviews.ts
+│   │   ├── comments.ts
+│   │   ├── checklists.ts
+│   │   ├── suggestions.ts
+│   │   ├── meetings.ts
+│   │   ├── surveys.ts
+│   │   ├── events.ts
+│   │   ├── tender.ts
+│   │   └── ai-proxy.ts     # POST /api/ai/ask, /api/ai/reindex/{entity}
 │   ├── middleware/
 │   │   ├── error-handler.ts  # Global error handler (AppError, ZodError)
 │   │   └── validation.ts     # Zod validation middleware factory
@@ -56,6 +67,43 @@ backend/
 - Reviews have `rating` field (integer, 1-10)
 - Subcontractor detail endpoint calculates average rating via SQL `AVG()`
 - Prepared for future AI evaluation
+
+### AI Assistant Integration (planned)
+
+The backend proxies requests to a separate Python/FastAPI microservice (port 3002) that provides RAG-based Q&A over system data.
+
+**Architecture:**
+```
+Frontend (5173) → Backend (3001) → AI Assistant (3002)
+                       ↓                    ↓
+                  PostgreSQL           pgvector
+                  (main data)      (embeddings table)
+```
+
+**Proxy route** — `/api/ai` on the backend forwards to the AI microservice:
+- `POST /api/ai/ask` — free-form question → answer + sources
+- `POST /api/ai/reindex/{entity}` — trigger reindexing of a single record
+
+Config: `AI_SERVICE_URL=http://localhost:3002` (env var).
+
+**Fire-and-forget reindexing:**
+On every CRUD operation (create/update/delete), the backend fires an async `POST /api/ai/reindex/{entity}` to the AI service. If unreachable, reindexing is deferred to the next full index rebuild. Non-blocking — CRUD response is sent immediately.
+
+**pgvector schema** (in same PostgreSQL, via extension):
+- Table `embeddings(id, entity_type, entity_id, chunk_index, content, embedding VECTOR(768), metadata JSONB)`
+- HNSW index on `embedding` with `vector_cosine_ops`
+- Embedding model: `intfloat/multilingual-e5-base` (768-dim, ONNX in prod)
+- Hybrid search: cosine similarity (0.7) + BM25 keyword (0.3)
+
+**LLM:** OpenAI-compatible API (`LLM_API_URL`, `LLM_MODEL` env vars), replaceable.
+
+**Security:**
+- No auth (MVP) — matches main API convention
+- Read-only — AI service never mutates main data tables
+- Employee names stripped from LLM prompts (IDs only)
+- AI endpoints not exposed externally — accessible only through the backend proxy
+
+See `docs/assistant.md` for full feature description and scenarios.
 
 ## Conventions
 - ESM modules (`"type": "module"`)

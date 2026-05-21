@@ -4,6 +4,7 @@ import { db, schema } from '../db/index.js';
 import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { notifyReindex } from '../ai-reindex.js';
 
 export const eventsRouter = Router();
 
@@ -52,6 +53,7 @@ eventsRouter.post('/', validateBody(createEventSchema), async (req, res, next) =
       ...req.body,
       eventDate: new Date(req.body.eventDate),
     }).returning();
+    notifyReindex('event', event.id);
     res.status(201).json(event);
   } catch (e) { next(e); }
 });
@@ -65,6 +67,7 @@ eventsRouter.put('/:id', validateBody(updateEventSchema), async (req, res, next)
       .where(eq(schema.contractorEvents.id, +req.params.id))
       .returning();
     if (!event) throw new AppError(404, 'Event not found');
+    notifyReindex('event', event.id);
     res.json(event);
   } catch (e) { next(e); }
 });
@@ -73,6 +76,7 @@ eventsRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.contractorEvents).where(eq(schema.contractorEvents.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Event not found');
+    notifyReindex('event', deleted.id);
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

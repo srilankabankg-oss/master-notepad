@@ -18,7 +18,8 @@ master-notepad/
 ├── AGENTS.md                 # Для AI-агентов
 ├── docs/
 │   ├── description.md        # Менеджерская документация
-│   └── technical.md          # Этот файл
+│   ├── technical.md          # Этот файл
+│   └── assistant.md          # Концепт Ассистента (AI+RAG)
 ├── backend/
 │   ├── src/
 │   │   ├── index.ts          # Точка входа, HTTP сервер
