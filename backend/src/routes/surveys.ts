@@ -4,6 +4,7 @@ import { db, schema } from '../db/index.js';
 import { eq } from 'drizzle-orm';
 import { validateBody } from '../middleware/validation.js';
 import { AppError } from '../middleware/error-handler.js';
+import { notifyReindex } from '../ai-reindex.js';
 
 export const surveysRouter = Router();
 
@@ -22,11 +23,7 @@ const createSurveySchema = z.object({
   questions: z.array(z.string()).default(defaultQuestions),
 });
 
-const _createResponseSchema = z.object({
-  surveyId: z.number().int().positive(),
-  employeeId: z.number().int().positive(),
-  answers: z.record(z.string(), z.string()),
-});
+const updateSurveySchema = createSurveySchema.partial();
 
 surveysRouter.get('/', async (req, res, next) => {
   try {
@@ -53,7 +50,20 @@ surveysRouter.get('/:id', async (req, res, next) => {
 surveysRouter.post('/', validateBody(createSurveySchema), async (req, res, next) => {
   try {
     const [survey] = await db.insert(schema.surveys).values(req.body).returning();
+    notifyReindex('survey', survey.id);
     res.status(201).json(survey);
+  } catch (e) { next(e); }
+});
+
+surveysRouter.put('/:id', validateBody(updateSurveySchema), async (req, res, next) => {
+  try {
+    const [survey] = await db.update(schema.surveys)
+      .set({ ...req.body, updatedAt: new Date() })
+      .where(eq(schema.surveys.id, +req.params.id))
+      .returning();
+    if (!survey) throw new AppError(404, 'Survey not found');
+    notifyReindex('survey', survey.id);
+    res.json(survey);
   } catch (e) { next(e); }
 });
 
@@ -83,6 +93,7 @@ surveysRouter.delete('/:id', async (req, res, next) => {
   try {
     const [deleted] = await db.delete(schema.surveys).where(eq(schema.surveys.id, +req.params.id)).returning();
     if (!deleted) throw new AppError(404, 'Survey not found');
+    notifyReindex('survey', deleted.id);
     res.json({ message: 'Deleted' });
   } catch (e) { next(e); }
 });

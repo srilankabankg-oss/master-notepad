@@ -29,7 +29,7 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await (globalThis as any).fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${BASE_URL}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
@@ -166,6 +166,8 @@ export const api = {
     get: (id: number) => request<Survey>(`/surveys/${id}`),
     create: (data: SurveyCreate) =>
       request<Survey>('/surveys', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<SurveyCreate>) =>
+      request<Survey>(`/surveys/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) =>
       request<void>(`/surveys/${id}`, { method: 'DELETE' }),
     respond: (id: number, data: SurveyResponseCreate) =>

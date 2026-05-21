@@ -30,6 +30,13 @@ export const useSurveyStore = defineStore('surveys', () => {
     return item
   }
 
+  async function update(id: number, data: Partial<SurveyCreate>) {
+    const item = await api.surveys.update(id, data)
+    const idx = items.value.findIndex((s) => s.id === id)
+    if (idx !== -1) items.value[idx] = item
+    return item
+  }
+
   async function remove(id: number) {
     await api.surveys.delete(id)
     items.value = items.value.filter((s) => s.id !== id)
@@ -43,5 +50,5 @@ export const useSurveyStore = defineStore('surveys', () => {
     return api.surveys.responses(id)
   }
 
-  return { items, loading, error, fetchAll, fetchById, create, remove, respond, responses }
+  return { items, loading, error, fetchAll, fetchById, create, update, remove, respond, responses }
 })
