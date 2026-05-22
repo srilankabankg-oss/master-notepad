@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api, errorMessage } from '@/api/client'
+import type { MeetingStage } from '@/types/api'
 import type { Meeting, MeetingCreate } from '@/types/api'
 
 export const useMeetingStore = defineStore('meetings', () => {
@@ -42,5 +43,9 @@ export const useMeetingStore = defineStore('meetings', () => {
     items.value = items.value.filter((m) => m.id !== id)
   }
 
-  return { items, loading, error, fetchAll, fetchById, create, update, remove }
+  async function transition(id: number, data: { stage: MeetingStage }) {
+    return api.meetings.transition(id, data)
+  }
+
+  return { items, loading, error, fetchAll, fetchById, create, update, remove, transition }
 })

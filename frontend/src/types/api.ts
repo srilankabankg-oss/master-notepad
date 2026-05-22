@@ -120,6 +120,12 @@ export interface SuggestionUpdate {
   status: SuggestionStatus
 }
 
+export type MeetingType = 'strategic' | 'coordination' | 'operational' | 'problem'
+export type OperationalSubtype = 'subcontractor' | 'designer' | 'supplier' | 'other'
+export type MeetingStage = 'draft' | 'preparation_clerk' | 'preparation_controller' | 'conducting' | 'approval' | 'distribution' | 'completed'
+export type MeetingPeriodicity = 'one_time' | 'recurring'
+export type GroupingMethod = 'by_topic' | 'by_subcontractor'
+
 export interface Meeting {
   id: number
   title: string
@@ -129,6 +135,14 @@ export interface Meeting {
   agenda: string
   decisions: string | null
   notes: string | null
+  stage: MeetingStage
+  meetingType: MeetingType
+  periodicity: MeetingPeriodicity
+  groupingMethod: GroupingMethod
+  operationalSubtype: OperationalSubtype | null
+  parentProtocolId: number | null
+  sequenceNumber: number
+  stageData: Record<string, unknown>
   createdAt: string
   updatedAt: string
 }
@@ -141,6 +155,135 @@ export interface MeetingCreate {
   agenda: string
   decisions?: string
   notes?: string
+  // v2 fields
+  meetingType?: MeetingType
+  periodicity?: MeetingPeriodicity
+  groupingMethod?: GroupingMethod
+  operationalSubtype?: OperationalSubtype
+  parentProtocolId?: number | null
+  stage?: MeetingStage
+}
+
+export interface MeetingUpdate {
+  title?: string
+  date?: string
+  subcontractorId?: number | null
+  attendees?: string[]
+  agenda?: string
+  decisions?: string
+  notes?: string
+  meetingType?: MeetingType
+  periodicity?: MeetingPeriodicity
+  groupingMethod?: GroupingMethod
+  operationalSubtype?: OperationalSubtype
+  parentProtocolId?: number | null
+  stage?: MeetingStage
+}
+
+export interface MeetingTransition {
+  stage: MeetingStage
+}
+
+export interface MeetingAttendance {
+  id: number
+  meetingId: number
+  employeeId: number
+  status: AttendanceStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export type AttendanceStatus = 'invited' | 'confirmed' | 'declined' | 'attended' | 'absent'
+
+export interface MeetingAttendanceCreate {
+  meetingId: number
+  employeeId: number
+  status?: AttendanceStatus
+}
+
+export interface ProtocolApproval {
+  id: number
+  meetingId: number
+  employeeId: number
+  status: ApprovalStatus
+  comment: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+
+export interface ProtocolApprovalCreate {
+  meetingId: number
+  employeeId: number
+  status?: ApprovalStatus
+  comment?: string
+}
+
+export interface Task {
+  id: number
+  protocolId: number
+  protocolTitle: string
+  employeeId: number
+  employeeName: string
+  title: string
+  description: string
+  status: TaskStatus
+  deadline: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type TaskStatus = 'submitted' | 'reviewing' | 'accepted' | 'rejected'
+
+export interface TaskCreate {
+  protocolId: number
+  employeeId: number
+  title: string
+  description?: string
+  deadline?: string
+}
+
+export interface TaskUpdate {
+  protocolId?: number
+  employeeId?: number
+  title?: string
+  description?: string
+  status?: TaskStatus
+  deadline?: string
+}
+
+export interface TaskTransition {
+  status: TaskStatus
+}
+
+export interface Organization {
+  id: number
+  name: string
+  description: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface OrganizationCreate {
+  name: string
+  description?: string
+}
+
+export interface NotificationPreferences {
+  id: number
+  employeeId: number
+  emailEnabled: boolean
+  pushEnabled: boolean
+  events: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface NotificationPreferencesUpdate {
+  emailEnabled?: boolean
+  pushEnabled?: boolean
+  events?: string[]
 }
 
 export interface Survey {

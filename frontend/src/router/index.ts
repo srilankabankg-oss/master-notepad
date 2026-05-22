@@ -35,6 +35,11 @@ const router = createRouter({
       component: () => import('@/views/MeetingsView.vue'),
     },
     {
+      path: '/meetings/:id',
+      name: 'meeting-detail',
+      component: () => import('@/views/MeetingDetailView.vue'),
+    },
+    {
       path: '/surveys',
       name: 'surveys',
       component: () => import('@/views/SurveysView.vue'),
@@ -58,6 +63,16 @@ const router = createRouter({
       path: '/events',
       name: 'events',
       component: () => import('@/views/EventsView.vue'),
+    },
+    {
+      path: '/tasks',
+      name: 'tasks',
+      component: () => import('@/views/TasksView.vue'),
+    },
+    {
+      path: '/tasks/:id',
+      name: 'task-detail',
+      component: () => import('@/views/TasksView.vue'),
     },
     {
       path: '/chat',

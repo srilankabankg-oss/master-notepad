@@ -22,3 +22,36 @@ export function statusLabel(
   }
   return labels[status]
 }
+
+/**
+ * Maps a task status to its Russian display label.
+ *
+ * - `submitted` → `'Отправлена'`
+ * - `reviewing` → `'На рассмотрении'`
+ * - `accepted`  → `'Принята'`
+ * - `rejected`  → `'Отклонена'`
+ *
+ * @param status - Task status identifier
+ * @returns Localised label string
+ */
+export function taskStatusLabel(
+  status: 'submitted' | 'reviewing' | 'accepted' | 'rejected',
+): string {
+  const labels: Record<'submitted' | 'reviewing' | 'accepted' | 'rejected', string> = {
+    submitted: 'Отправлена',
+    reviewing: 'На рассмотрении',
+    accepted: 'Принята',
+    rejected: 'Отклонена',
+  }
+  return labels[status]
+}
+
+/**
+ * Returns a CSS class for a task status badge.
+ *
+ * @param status - Task status identifier
+ * @returns CSS class string
+ */
+export function taskStatusClass(status: string): string {
+  return `status-${status}`
+}

@@ -5,7 +5,12 @@ import type {
   Comment, CommentCreate, CommentUpdate,
   Checklist, ChecklistCreate, ChecklistUpdate,
   Suggestion, SuggestionCreate, SuggestionUpdate,
-  Meeting, MeetingCreate,
+  Meeting, MeetingCreate, MeetingUpdate, MeetingTransition,
+  MeetingAttendance, MeetingAttendanceCreate, AttendanceStatus,
+  ProtocolApproval, ProtocolApprovalCreate, ApprovalStatus,
+  Task, TaskCreate, TaskUpdate, TaskTransition, TaskStatus,
+  Organization, OrganizationCreate,
+  NotificationPreferences, NotificationPreferencesUpdate,
   Survey, SurveyCreate,
   SurveyResponse, SurveyResponseCreate,
   ContractorEvent, ContractorEventCreate, TenderSummary,
@@ -145,10 +150,44 @@ export const api = {
     get: (id: number) => request<Meeting>(`/meetings/${id}`),
     create: (data: MeetingCreate) =>
       request<Meeting>('/meetings', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<MeetingCreate>) =>
+    update: (id: number, data: MeetingUpdate) =>
       request<Meeting>(`/meetings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) =>
       request<void>(`/meetings/${id}`, { method: 'DELETE' }),
+    transition: (id: number, data: MeetingTransition) =>
+      request<Meeting>(`/meetings/${id}/transition`, { method: 'POST', body: JSON.stringify(data) }),
+    attendance: {
+      list: (meetingId: number) =>
+        request<MeetingAttendance[]>(`/meetings/${meetingId}/attendance`),
+      create: (meetingId: number, data: MeetingAttendanceCreate) =>
+        request<MeetingAttendance>(`/meetings/${meetingId}/attendance`, { method: 'POST', body: JSON.stringify(data) }),
+      update: (meetingId: number, attendanceId: number, data: Partial<MeetingAttendanceCreate>) =>
+        request<MeetingAttendance>(`/meetings/${meetingId}/attendance/${attendanceId}`, { method: 'PUT', body: JSON.stringify(data) }),
+      delete: (meetingId: number, attendanceId: number) =>
+        request<void>(`/meetings/${meetingId}/attendance/${attendanceId}`, { method: 'DELETE' }),
+    },
+    approvals: {
+      list: (meetingId: number) =>
+        request<ProtocolApproval[]>(`/meetings/${meetingId}/approvals`),
+      create: (meetingId: number, data: ProtocolApprovalCreate) =>
+        request<ProtocolApproval>(`/meetings/${meetingId}/approvals`, { method: 'POST', body: JSON.stringify(data) }),
+      update: (meetingId: number, approvalId: number, data: Partial<ProtocolApprovalCreate>) =>
+        request<ProtocolApproval>(`/meetings/${meetingId}/approvals/${approvalId}`, { method: 'PUT', body: JSON.stringify(data) }),
+      delete: (meetingId: number, approvalId: number) =>
+        request<void>(`/meetings/${meetingId}/approvals/${approvalId}`, { method: 'DELETE' }),
+    },
+    taskRequests: {
+      list: (protocolId: number) =>
+        request<Task[]>(`/meetings/${protocolId}/task-requests`),
+      get: (protocolId: number, taskId: number) =>
+        request<Task>(`/meetings/${protocolId}/task-requests/${taskId}`),
+      create: (protocolId: number, data: TaskCreate) =>
+        request<Task>(`/meetings/${protocolId}/task-requests`, { method: 'POST', body: JSON.stringify(data) }),
+      update: (protocolId: number, taskId: number, data: TaskUpdate) =>
+        request<Task>(`/meetings/${protocolId}/task-requests/${taskId}`, { method: 'PUT', body: JSON.stringify(data) }),
+      delete: (protocolId: number, taskId: number) =>
+        request<void>(`/meetings/${protocolId}/task-requests/${taskId}`, { method: 'DELETE' }),
+    },
   },
 
   events: {
@@ -182,6 +221,42 @@ export const api = {
 
   tender: {
     summary: (id: number) => request<TenderSummary>(`/tender/${id}/summary`),
+  },
+
+  tasks: {
+    list: (params?: { status?: TaskStatus; protocolId?: number; employeeId?: number; search?: string }) =>
+      request<Task[]>(`/tasks${params ? `?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)] as [string, string])).toString()}` : ''}`),
+    get: (id: number) => request<Task>(`/tasks/${id}`),
+    create: (data: TaskCreate) =>
+      request<Task>('/tasks', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: TaskUpdate) =>
+      request<Task>(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      request<void>(`/tasks/${id}`, { method: 'DELETE' }),
+    transition: (id: number, data: TaskTransition) =>
+      request<Task>(`/tasks/${id}/transition`, { method: 'POST', body: JSON.stringify(data) }),
+    markDone: (id: number) =>
+      request<Task>(`/tasks/${id}/done`, { method: 'POST' }),
+    reorder: (tasks: { id: number; order: number }[]) =>
+      request<{ message: string }>('/tasks/reorder', { method: 'POST', body: JSON.stringify({ tasks }) }),
+  },
+
+  organizations: {
+    list: () => request<Organization[]>('/organizations'),
+    get: (id: number) => request<Organization>(`/organizations/${id}`),
+    create: (data: OrganizationCreate) =>
+      request<Organization>('/organizations', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<OrganizationCreate>) =>
+      request<Organization>(`/organizations/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: number) =>
+      request<void>(`/organizations/${id}`, { method: 'DELETE' }),
+  },
+
+  notifications: {
+    preferences: () =>
+      request<NotificationPreferences>('/notifications/preferences'),
+    updatePreferences: (data: NotificationPreferencesUpdate) =>
+      request<NotificationPreferences>('/notifications/preferences', { method: 'PUT', body: JSON.stringify(data) }),
   },
 
   auth: {
