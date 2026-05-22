@@ -40,9 +40,9 @@ export default defineConfig({
     globals: true,
   },
   server: {
-    port: 5173,
+    port: 3356,
     proxy: {
-      '/api': { target: 'http://localhost:3001', changeOrigin: true },
+      '/api': { target: 'http://localhost:3355', changeOrigin: true },
     },
   },
 });

@@ -99,7 +99,7 @@ The backend proxies requests to a separate Python/FastAPI microservice (port 300
 
 **Architecture:**
 ```
-Frontend (5173) → Backend (3001) → AI Assistant (3002)
+Frontend (3356) → Backend (3355) → AI Assistant (3002)
                        ↓                    ↓
                   PostgreSQL           pgvector
                   (main data)      (embeddings table)
@@ -143,4 +143,4 @@ See `docs/product/assistant.md` for full feature description and scenarios. Tech
 - Async error handling via `try/catch` with `next(e)`
 - No `any` types, no `@ts-ignore`
 - Environment variables via `dotenv/config`
-- Port: 3001 (configurable via PORT env)
+- Port: 3355 (configurable via PORT env)

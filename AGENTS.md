@@ -16,14 +16,14 @@
 ## Project Structure
 ```
 master-notepad/
-├── backend/          # Express API server (port 3001)
+├── backend/          # Express API server (port 3355)
 │   ├── AGENTS.md     # Backend architecture & conventions
 │   └── src/
 │       ├── db/       # Drizzle ORM connection + schema
 │       ├── routes/   # REST API handlers (13 modules)
 │       ├── middleware/ # Auth, RBAC, validation, error handling, audit
 │       └── notifications/ # Email + Telegram services
-├── frontend/         # Vue 3 SPA (port 5173)
+├── frontend/         # Vue 3 SPA (port 3356)
 │   ├── AGENTS.md     # Frontend architecture & conventions
 │   └── src/
 │       ├── views/    # Page components (17 views)
@@ -47,19 +47,100 @@ master-notepad/
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- Python 3.10+ (for AI assistant)
-- Docker (PostgreSQL in `master-notepad-pg` container on port 5433)
+- **Node.js** 18+ (`node -v`)
+- **Docker** (`docker --version`) — для PostgreSQL
+- **Python** 3.10+ (`python3 --version`) — для AI-ассистента (опционально)
 
-### Setup
+### Быстрый старт (dev)
+
 ```bash
+# 1. Установка зависимостей
 npm install
-docker start master-notepad-pg
-cd backend && cp .env.example .env
-npm run db:generate -w backend
-npm run db:migrate -w backend
+
+# 2. Запуск PostgreSQL
+docker run -d --name master-notepad-pg \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=master_notepad \
+  -p 5433:5432 postgres:16-alpine
+
+# 3. Конфигурация
+cd backend
+cp .env.example .env
+
+# 4. Миграция схемы БД
+npm run db:push -w backend
+
+# 5. Наполнение тестовыми данными
+npm run seed
+
+# 6. Запуск
 npm run dev
 ```
+
+После запуска:
+| Сервис | URL |
+|--------|-----|
+| Фронтенд | http://localhost:3356 |
+| Бэкенд API | http://localhost:3355 |
+| Health check | http://localhost:3355/api/health |
+
+**Тестовые учётные записи** (после `npm run seed`):
+
+| Email | Пароль | Роль |
+|-------|--------|------|
+| pavel@example.com | admin123 | Администратор |
+| anna@example.com | clerk123 | Делопроизводитель |
+| ivan@example.com | ctrl123 | Контролирующий |
+| sergey@example.com | ctrl123 | Контролирующий |
+| maria@example.com | emp123 | Сотрудник |
+
+### Продакшен
+
+```bash
+# 1. Сборка
+npm run build
+
+# 2. Бэкенд (port 3355)
+cd backend && NODE_ENV=production npm run start
+
+# 3. Фронтенд — раздать статику через nginx/Caddy
+# frontend/dist/ — готовая статика
+```
+
+**Пример конфига nginx:**
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /path/to/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:3355;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+**Переменные окружения** (`backend/.env`):
+
+| Переменная | По умолчанию | Описание |
+|-----------|-------------|----------|
+| `DATABASE_URL` | `postgresql://...:5433/master_notepad` | Строка подключения PostgreSQL |
+| `PORT` | `3355` | Порт бэкенда |
+| `NODE_ENV` | `development` | `development` / `production` |
+| `CORS_ORIGIN` | `http://localhost:3356` | Разрешённый origin для CORS |
+| `SESSION_SECRET` | (обязательно) | Секрет для сессий (мин. 32 символа) |
+| `AI_SERVICE_URL` | `http://localhost:3002` | URL AI-микросервиса |
+| `SMTP_HOST` | `localhost` | SMTP-сервер для email |
+| `SMTP_PORT` | `587` | Порт SMTP |
+| `TELEGRAM_BOT_TOKEN` | — | Токен Telegram-бота (опционально) |
 
 ### AI Assistant Setup
 ```bash
