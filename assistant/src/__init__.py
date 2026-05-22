@@ -1,0 +1,1 @@
+# Master Notepad — AI Assistant microservice
