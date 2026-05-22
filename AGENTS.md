@@ -1,16 +1,17 @@
 # Master Notepad - AGENTS.md
 
 ## Project Overview
-**Master Notepad** — система управления подрядчиками строительной организации. Позволяет хранить отзывы сотрудников о подрядчиках, вести чек-листы проверки объектов, протоколы совещаний, опросы и рейтинги.
+**Master Notepad** — система управления подрядчиками строительной организации. Позволяет хранить отзывы сотрудников о подрядчиках, вести чек-листы проверки объектов, протоколы совещаний (v2 с 7-этапным жизненным циклом), задачи с параллелизацией, опросы, рейтинги, уведомления (email + telegram) и AI-анализ.
 
 ## Tech Stack
 | Layer | Technology |
 |-------|-----------|
 | Backend | Node.js + Express + TypeScript |
-| Database | PostgreSQL + Drizzle ORM |
+| Database | PostgreSQL + Drizzle ORM + pgvector |
 | Frontend | Vue 3 + TypeScript + Pinia + Vue Router |
 | Build | Vite + PWA plugin |
 | Package Manager | npm workspaces |
+| AI | Python + FastAPI + pgvector (port 3002) |
 
 ## Project Structure
 ```
@@ -19,16 +20,27 @@ master-notepad/
 │   ├── AGENTS.md     # Backend architecture & conventions
 │   └── src/
 │       ├── db/       # Drizzle ORM connection + schema
-│       ├── routes/   # REST API handlers
-│       └── middleware/ # Validation + error handling
+│       ├── routes/   # REST API handlers (13 modules)
+│       ├── middleware/ # Auth, RBAC, validation, error handling, audit
+│       └── notifications/ # Email + Telegram services
 ├── frontend/         # Vue 3 SPA (port 5173)
 │   ├── AGENTS.md     # Frontend architecture & conventions
 │   └── src/
-│       ├── views/    # Page components
+│       ├── views/    # Page components (17 views)
 │       ├── stores/   # Pinia state management
 │       ├── api/      # API client + types
 │       ├── router/   # Vue Router config
 │       └── components/ # Shared layout components
+├── assistant/        # AI microservice (Python/FastAPI, port 3002)
+│   └── src/
+│       ├── api/      # API endpoints (ask, analyze, transcribe)
+│       ├── analysis/ # Sentiment, patterns, audio pipeline
+│       ├── rag/      # Embeddings, retrieval, ingestion
+│       ├── llm/      # LLM provider adapter
+│       └── db/       # pgvector vector store
+├── docs/
+│   ├── product/      # Продуктовая документация
+│   └── tech/         # Техническая документация + PLAN.md
 └── package.json      # Workspace root
 ```
 
@@ -36,50 +48,54 @@ master-notepad/
 
 ### Prerequisites
 - Node.js 18+
-- Docker (PostgreSQL runs in `master-notepad-pg` container on port 5433)
-- PostgreSQL 14+ (via Docker container `master-notepad-pg`, port `5433`)
+- Python 3.10+ (for AI assistant)
+- Docker (PostgreSQL in `master-notepad-pg` container on port 5433)
 
 ### Setup
 ```bash
-# Install dependencies
 npm install
-
-# Start PostgreSQL (Docker)
 docker start master-notepad-pg
-
-# Configure database (copy .env.example to .env and set DATABASE_URL)
-cd backend
-cp .env.example .env
-
-# Generate and run migrations
+cd backend && cp .env.example .env
 npm run db:generate -w backend
 npm run db:migrate -w backend
+npm run dev
+```
 
-# Start development
-npm run dev  # starts both backend and frontend
+### AI Assistant Setup
+```bash
+cd assistant
+pip install -r requirements.txt
+uvicorn src.main:app --port 3002 --reload
 ```
 
 ## Core Features
-1. **Подрядчики**: CRUD с рейтингом (среднее отзывов)
+1. **Подрядчики**: CRUD с рейтингом (AVG + взвешенный)
 2. **Отзывы**: Оценка 1-10 + текст
 3. **Чек-листы**: Организационные и личные, предложения улучшений
-4. **Протоколы совещаний**: Стандартная форма (повестка, участники, решения)
-5. **Комментарии**: Дополнительная информация о подрядчиках
-6. **Опросы**: Стандартный шаблон из 5 вопросов
-7. **Сотрудники**: Управление персоналом организации
-8. **Журнал событий**: Хронология инцидентов по подрядчикам (положительные/нарушения/инфо)
-9. **Ассистент**: AI-агент с RAG, отвечает в свободной форме по данным системы. См. `docs/product/assistant.md`
+4. **Протоколы v2**: 7-этапный жизненный цикл, 4 типа, периодичность, группировка, AI этапа 3
+5. **Задачи**: TASK-YYYY-NNNNN нумерация, параллелизация между протоколами, цепочки
+6. **Организации**: Учёт юрлиц с ИНН, связи с договорами
+7. **RBAC**: 5 ролей (admin, clerk, controller, employee, contractors)
+8. **Уведомления**: Email (nodemailer) + Telegram (telegraf)
+9. **AI Ассистент**: RAG-чат + анализ тональности + поиск паттернов + транскрибация
+10. **Отчёты**: PDF-экспорт (puppeteer), Excel-импорт (xlsx)
 
 ## Development Commands
 ```bash
 npm run dev          # Start both backend + frontend
 npm run build        # Build both
 npm run db:push -w backend  # Push schema to DB (dev)
+npm run db:generate -w backend  # Generate migration
+npm run db:migrate -w backend   # Run migration
 ```
 
 ## Architecture Decisions
-- **Monorepo** via npm workspaces for simplicity
-- **No authentication** in MVP — employee IDs passed in request body
-- **Rating system** prepared for AI integration (AVG aggregation, 1-10 scale)
-- **PWA** via vite-plugin-pwa for offline-capable mobile access
-- **Drizzle ORM** for type-safe database access without code generation bloat
+- **Monorepo** via npm workspaces
+- **Session auth** via express-session + PostgreSQL store, bcrypt, 2 роли (admin/employee)
+- **RBAC** via requireRole middleware factory
+- **Rating system** AVG aggregation + weighted (reviews ± events)
+- **PWA** via vite-plugin-pwa for offline mobile access
+- **Drizzle ORM** for type-safe database access
+- **Notifications** fire-and-forget with retry, multi-channel (email + telegram)
+- **PDF export** via puppeteer headless Chrome
+- **AI microservice** separate Python/FastAPI service on port 3002

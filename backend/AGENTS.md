@@ -14,21 +14,33 @@ backend/
 │   │   └── schema/
 │   │       └── index.ts  # All database tables, relations, enums
 │   ├── routes/           # Route handlers (one file per entity) + AI proxy
+│   │   ├── auth.ts
 │   │   ├── employees.ts
 │   │   ├── subcontractors.ts
 │   │   ├── reviews.ts
 │   │   ├── comments.ts
 │   │   ├── checklists.ts
 │   │   ├── suggestions.ts
-│   │   ├── meetings.ts
+│   │   ├── meetings.ts      # v2: transition, RSVP, attendance, approvals, distribute, task requests
+│   │   ├── tasks.ts         # v2: CRUD, move/return, reorder, subtasks, links
+│   │   ├── organizations.ts # v2: CRUD with INN uniqueness
+│   │   ├── notifications.ts # v2: user preferences
+│   │   ├── reports.ts       # v2: PDF export, Excel import
 │   │   ├── surveys.ts
 │   │   ├── events.ts
 │   │   ├── tender.ts
-│   │   └── ai-proxy.ts     # POST /api/ai/ask, /api/ai/reindex/{entity}
+│   │   └── ai.ts            # POST /api/ai/ask, /api/ai/analyze/*, /api/ai/transcribe
 │   ├── middleware/
-│   │   ├── error-handler.ts  # Global error handler (AppError, ZodError)
-│   │   └── validation.ts     # Zod validation middleware factory
-│   └── types/            # Shared TypeScript types
+│   │   ├── auth.ts          # requireAuth, getEmployeeId
+│   │   ├── rbac.ts          # requireRole(...roles) factory
+│   │   ├── error-handler.ts # Global error handler (AppError, ZodError)
+│   │   ├── validation.ts    # Zod validation middleware factory
+│   │   └── audit.ts         # Fire-and-forget audit logging
+│   ├── notifications/       # Email + Telegram services
+│   │   ├── email.ts         # Nodemailer SMTP transport
+│   │   ├── telegram.ts      # Telegraf bot
+│   │   └── service.ts       # Multi-channel send with retry
+│   └── types/               # Shared TypeScript types
 ├── drizzle/              # Generated migrations (by drizzle-kit)
 ├── drizzle.config.ts     # Drizzle Kit configuration
 └── package.json
@@ -48,9 +60,9 @@ backend/
 - Validation: Zod schemas on request body
 - Error handling: AppError class + global error middleware
 - Session-based authentication (express-session + PostgreSQL store, bcrypt passwords)
-- Two roles: `admin` and `employee` (role column, RBAC enforcement planned)
+- RBAC enforcement via requireRole middleware: admin, clerk, controller, employee
 - Auth endpoints: POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me
-- requireAuth middleware protects all routes; employeeId from session with body fallback
+- requireAuth middleware protects all routes; employeeId from session
 
 ### Entities & Tables
 | Entity | Table | Description |
@@ -66,6 +78,15 @@ backend/
 | SurveyResponses | `survey_responses` | Individual responses to surveys |
 | ContractorEvents | `contractor_events` | Event log: positive/violation/info entries |
 | AuditLog | `audit_log` | Change history: who changed what and when |
+| Organizations | `organizations` | Legal entities with INN |
+| TaskRequests | `task_requests` | Employee task requests to meeting agenda |
+| ProtocolApprovals | `protocol_approvals` | Multi-person approval records |
+| ProtocolDistributions | `protocol_distributions` | Distribution tracking (email/telegram) |
+| MeetingAttendance | `meeting_attendance` | Attendance with RSVP tokens |
+| Tasks | `tasks` | Tasks with TASK-YYYY-NNNNN numbering, cross-protocol delegation |
+| ProtocolTaskLinks | `protocol_task_links` | Junction: task↔protocol with role (home/delegated) |
+| TaskReformulations | `task_reformulations` | Task reformulation chain history |
+| UserNotificationPrefs | `user_notification_preferences` | Per-user notification channel settings |
 
 ### Rating System
 - Reviews have `rating` field (integer, 1-10)
