@@ -1,0 +1,101 @@
+{
+  "employees": [
+    { "name": "Павел Моргунов", "email": "pavel@example.com", "position": "Руководитель", "role": "admin", "password": "admin123" },
+    { "name": "Анна Смирнова", "email": "anna@example.com", "position": "Делопроизводитель", "role": "clerk", "password": "clerk123" },
+    { "name": "Иван Петров", "email": "ivan@example.com", "position": "Руководитель строительства", "role": "controller", "password": "ctrl123" },
+    { "name": "Сергей Волков", "email": "sergey@example.com", "position": "Директор по строительству", "role": "controller", "password": "ctrl123" },
+    { "name": "Мария Кузнецова", "email": "maria@example.com", "position": "Инженер ПТО", "role": "employee", "password": "emp123" },
+    { "name": "Дмитрий Соколов", "email": "dmitry@example.com", "position": "Прораб", "role": "employee", "password": "emp123" },
+    { "name": "Елена Попова", "email": "elena@example.com", "position": "Инженер-проектировщик", "role": "employee", "password": "emp123" }
+  ],
+  "subcontractors": [
+    { "name": "ООО СтройМонтаж", "companyName": "СтройМонтаж", "contactInfo": "+7 900 111-22-33", "specialization": "Монолитные работы, фундаменты", "description": "Крупный подрядчик по бетонным работам. Работают с 2018 года." },
+    { "name": "ИП Иванов А.А.", "companyName": null, "contactInfo": "+7 900 222-33-44", "specialization": "Электрика", "description": "Частный электрик, берёт небольшие объёмы." },
+    { "name": "ООО ТехноСтрой", "companyName": "ТехноСтрой", "contactInfo": "+7 900 333-44-55, office@technostroy.ru", "specialization": "Инженерные системы, автоматизация", "description": "Специализируются на слаботочных системах и диспетчеризации." },
+    { "name": "ООО КровляПро", "companyName": "КровляПро", "contactInfo": "+7 900 444-55-66", "specialization": "Кровельные работы", "description": "Все виды кровли. Промышленные и частные объекты." },
+    { "name": "ООО ФасадСтрой", "companyName": "ФасадСтрой", "contactInfo": "+7 900 555-66-77", "specialization": "Фасадные работы, вентилируемые фасады", "description": "Работают с керамогранитом и композитными панелями." }
+  ],
+  "organizations": [
+    { "name": "ООО СтройМонтаж", "inn": "7712345678", "activityType": "Строительство", "isContractor": true },
+    { "name": "ООО ТехноСтрой", "inn": "7723456789", "activityType": "Проектирование и монтаж", "isContractor": true },
+    { "name": "ООО КровляПро", "inn": "7734567890", "activityType": "Строительство", "isContractor": true },
+    { "name": "ООО ФасадСтрой", "inn": "7745678901", "activityType": "Строительство", "isContractor": true }
+  ],
+  "reviews": [
+    { "subcontractorIdx": 0, "employeeIdx": 0, "content": "Надёжный подрядчик по фундаментам. Соблюдают сроки, качество на уровне. Рекомендую.", "rating": 9 },
+    { "subcontractorIdx": 0, "employeeIdx": 3, "content": "Хорошо делают монолит. Была небольшая задержка на 2 дня, но в целом отлично.", "rating": 8 },
+    { "subcontractorIdx": 1, "employeeIdx": 4, "content": "Электрику сделал нормально. Небольшие объёмы — его конёк. На крупный объект не возьму.", "rating": 7 },
+    { "subcontractorIdx": 2, "employeeIdx": 0, "content": "Автоматизацию сделали хорошо. Диспетчеризация работает стабильно. Цена выше рынка.", "rating": 8 },
+    { "subcontractorIdx": 2, "employeeIdx": 5, "content": "По автоматизации: были проблемы с датчиками — забыли указать места установки в проекте. Пришлось переделывать.", "rating": 5 },
+    { "subcontractorIdx": 3, "employeeIdx": 3, "content": "Кровлю сделали качественно, протечек нет. По срокам уложились.", "rating": 9 }
+  ],
+  "comments": [
+    { "subcontractorIdx": 0, "employeeIdx": 0, "content": "Есть свой транспорт, могут доставлять материалы на объект" },
+    { "subcontractorIdx": 2, "employeeIdx": 4, "content": "Работают только по безналу, НДС" },
+    { "subcontractorIdx": 3, "employeeIdx": 5, "content": "Контактное лицо: Иванов Сергей, +7 900 777-88-99" }
+  ],
+  "events": [
+    { "subcontractorIdx": 0, "employeeIdx": 5, "type": "positive", "description": "Досрочно завершили фундамент на объекте ЖК Восток", "eventDate": "2026-04-15" },
+    { "subcontractorIdx": 0, "employeeIdx": 3, "type": "violation", "description": "Сорвали поставку арматуры на 3 дня на объекте ЖК Север", "eventDate": "2026-05-10" },
+    { "subcontractorIdx": 2, "employeeIdx": 4, "type": "violation", "description": "В проекте автоматизации не указаны места установки датчиков", "eventDate": "2026-03-20" },
+    { "subcontractorIdx": 3, "employeeIdx": 5, "type": "info", "description": "Запросили образцы материалов для согласования", "eventDate": "2026-05-01" },
+    { "subcontractorIdx": 1, "employeeIdx": 5, "type": "violation", "description": "Задержка сдачи электрощитовой на 5 дней", "eventDate": "2026-02-14" }
+  ],
+  "meetings": [
+    { "title": "Оперативное совещание по ЖК Восток", "date": "2026-05-15T10:00:00Z", "subcontractorIdx": 0, "attendees": ["Павел Моргунов", "Иван Петров", "Дмитрий Соколов"], "agenda": "Обсуждение графика бетонных работ, поставка арматуры", "decisions": "Перенести поставку арматуры на 18 мая. Усилить контроль качества.", "meetingType": "operational", "periodicity": "one_time", "groupingMethod": "by_subcontractor" },
+    { "title": "Координационное совещание проектной команды", "date": "2026-05-20T14:00:00Z", "subcontractorIdx": null, "attendees": ["Елена Попова", "Иван Петров", "Сергей Волков"], "agenda": "Проверка рабочей документации по автоматизации", "decisions": "Добавить в чек-лист проверку мест установки датчиков", "meetingType": "coordination", "periodicity": "recurring", "groupingMethod": "by_topic" },
+    { "title": "Проблемное совещание: срыв сроков поставки", "date": "2026-04-10T09:00:00Z", "subcontractorIdx": 1, "attendees": ["Павел Моргунов", "Иван Петров"], "agenda": "Разбор причин срыва поставки электрооборудования", "decisions": "Выставить штрафные санкции. Запросить гарантийное письмо.", "meetingType": "problem", "periodicity": "one_time", "groupingMethod": "by_subcontractor" }
+  ],
+  "surveys": [
+    {
+      "title": "Опрос по ООО СтройМонтаж",
+      "subcontractorIdx": 0,
+      "createdBy": 0,
+      "questions": [
+        "Оцените качество работ подрядчика",
+        "Оцените соблюдение сроков",
+        "Оцените коммуникацию с подрядчиком",
+        "Общие впечатления о работе",
+        "Рекомендации и пожелания"
+      ],
+      "responses": [
+        { "employeeIdx": 3, "answers": { "0": "Хорошо", "1": "Средне", "2": "Отлично", "3": "Положительные", "4": "Продолжать сотрудничество" } },
+        { "employeeIdx": 5, "answers": { "0": "Отлично", "1": "Хорошо", "2": "Хорошо", "3": "Положительные", "4": "Увеличить объёмы" } }
+      ]
+    }
+  ],
+  "checklists": [
+    {
+      "title": "Проверка фундамента",
+      "type": "organization",
+      "ownerIdx": 3,
+      "items": [
+        { "text": "Проверить геодезическую разбивку", "completed": true },
+        { "text": "Проверить армирование", "completed": true },
+        { "text": "Проверить опалубку", "completed": false },
+        { "text": "Проверить гидроизоляцию", "completed": false },
+        { "text": "Контроль прочности бетона", "completed": false }
+      ]
+    },
+    {
+      "title": "Проверка рабочей документации",
+      "type": "organization",
+      "ownerIdx": 0,
+      "items": [
+        { "text": "Проверить спецификации оборудования", "completed": true },
+        { "text": "Проверить места установки датчиков", "completed": false },
+        { "text": "Проверить кабельные журналы", "completed": true },
+        { "text": "Проверить планы трасс", "completed": false }
+      ]
+    },
+    {
+      "title": "Мои заметки по электрике",
+      "type": "personal",
+      "ownerIdx": 4,
+      "items": [
+        { "text": "Проверить заземление", "completed": false },
+        { "text": "Проверить УЗО в щитовой", "completed": true }
+      ]
+    }
+  ]
+}
