@@ -12,6 +12,8 @@
 DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<database>
 PORT=3001
 NODE_ENV=production
+SESSION_SECRET=<strong-random-secret>
+AI_SERVICE_URL=http://localhost:3002
 ```
 
 ## Deployment Steps
@@ -26,6 +28,12 @@ docker run --name master-notepad-pg \
   -e POSTGRES_DB=master_notepad \
   -p 5433:5432 \
   -d postgres:15-alpine
+```
+
+Enable the pgvector extension for AI Assistant embeddings:
+
+```bash
+docker exec -it master-notepad-pg psql -U <user> -d master_notepad -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
 ### 2. Install Dependencies
@@ -80,6 +88,31 @@ server {
 }
 ```
 
+## AI Assistant Service
+
+The AI Assistant runs as a separate service on port 3002. It provides RAG-powered responses over contractor and meeting data.
+
+### Docker
+
+```bash
+docker run --name master-notepad-ai \
+  -e DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<database> \
+  -e MAIN_API_URL=http://localhost:3001 \
+  -e LLM_API_URL=https://api.openai.com/v1 \
+  -e LLM_MODEL=gpt-4o-mini \
+  -e EMBEDDING_MODEL=intfloat/multilingual-e5-base \
+  -e PORT=3002 \
+  -p 3002:3002 \
+  master-notepad-ai:latest
+```
+
+### Health Check
+
+```bash
+curl http://localhost:3002/api/health
+# Expected: {"status":"ok"}
+```
+
 ## Docker Deployment
 
 ```bash
@@ -105,7 +138,7 @@ docker exec master-notepad-pg pg_dump -U postgres master_notepad > backup.sql
 
 ## Notes
 
-- This project has **no authentication** in the current version
 - The frontend build is a static SPA — serve it from any web server
 - Backend serves the API on port 3001 by default
+- AI Assistant service runs on port 3002
 - Configure CORS in `backend/src/app.ts` for production domains

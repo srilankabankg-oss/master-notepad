@@ -113,7 +113,7 @@ Start AI service: `cd assistant && source venv/bin/activate && uvicorn src.main:
 - Employee names stripped from LLM prompts (IDs only)
 - AI endpoints not exposed externally — accessible only through the backend proxy
 
-See `docs/assistant.md` for full feature description and scenarios.
+See `docs/product/assistant.md` for full feature description and scenarios. Technical design: `docs/tech/assistant.md`.
 
 ## Conventions
 - ESM modules (`"type": "module"`)

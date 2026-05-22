@@ -1,10 +1,13 @@
 # Development Setup
 
+> This is the technical setup guide. For architecture overview, see [docs/tech/architecture.md](../tech/architecture.md).
+
 ## Prerequisites
 
 - **Node.js** 18+ (check: `node -v`)
 - **npm** (comes with Node.js)
 - **Docker** (for PostgreSQL, check: `docker --version`)
+- **Python** 3.10+ (for AI Assistant, check: `python3 -v`)
 
 ## Quick Start
 
@@ -22,6 +25,7 @@ docker start master-notepad-pg
 After startup:
 - **Backend API**: http://localhost:3001
 - **Frontend SPA**: http://localhost:5173
+- **AI Assistant**: http://localhost:3002
 
 ## Manual Setup
 
@@ -44,12 +48,25 @@ npm run dev -w backend   # Backend on port 3001
 npm run dev -w frontend  # Frontend on port 5173
 ```
 
+## AI Assistant
+
+To run the AI Assistant locally:
+
+```bash
+cd assistant
+pip install -r requirements.txt
+uvicorn src.main:app --port 3002 --reload
+```
+
+The assistant runs independently on port 3002 and is consumed by the backend via the `AI_SERVICE_URL` environment variable.
+
 ## Project Structure
 
 | Directory | Description |
 |-----------|-------------|
 | `backend/` | Express API server |
 | `frontend/` | Vue 3 SPA |
+| `assistant/` | AI Assistant service (FastAPI) |
 | `scripts/` | Helper scripts |
 | `docs/` | Documentation |
 | `e2e/` | Playwright E2E tests |
@@ -105,6 +122,7 @@ Create `backend/.env` (see `backend/.env.example`):
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/master_notepad
 PORT=3001
 NODE_ENV=development
+AI_SERVICE_URL=http://localhost:3002
 ```
 
 Key variables:
@@ -113,6 +131,7 @@ Key variables:
 | `DATABASE_URL` | required | PostgreSQL connection string |
 | `PORT` | 3001 | Backend server port |
 | `NODE_ENV` | development | Environment mode |
+| `AI_SERVICE_URL` | http://localhost:3002 | AI Assistant service URL |
 
 ## Database Schema Changes
 
