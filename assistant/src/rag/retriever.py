@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..db.vector_store import vector_store
 from .embedder import embed_query
 
