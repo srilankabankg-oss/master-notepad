@@ -368,6 +368,19 @@ export const taskReformulations = pgTable('task_reformulations', {
 });
 
 // ── Audit Log ──
+export const userNotificationPreferences = pgTable('user_notification_preferences', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').references(() => employees.id, { onDelete: 'cascade' }).notNull().unique(),
+  emailEnabled: boolean('email_enabled').default(true).notNull(),
+  telegramEnabled: boolean('telegram_enabled').default(false).notNull(),
+  telegramChatId: varchar('telegram_chat_id', { length: 100 }),
+  notifyDeadlines: boolean('notify_deadlines').default(true).notNull(),
+  notifyProtocolDistribution: boolean('notify_protocol_distribution').default(true).notNull(),
+  notifyTaskRequestResults: boolean('notify_task_request_results').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 export const auditLog = pgTable('audit_log', {
   id: serial('id').primaryKey(),
   entityType: varchar('entity_type', { length: 50 }).notNull(),

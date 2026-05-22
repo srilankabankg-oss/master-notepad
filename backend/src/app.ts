@@ -23,6 +23,8 @@ import { authRouter } from './routes/auth.js';
 import { auditLogRouter } from './routes/audit.js';
 import { errorHandler } from './middleware/error-handler.js';
 
+import { reportsRouter } from './routes/reports.js';
+import { notificationsRouter } from './routes/notifications.js';
 export const app = express();
 
 // Security
@@ -81,6 +83,8 @@ app.use('/api/tender', tenderRouter);
 app.use('/api/organizations', organizationsRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/reports', reportsRouter);
+app.use('/api/notifications', notificationsRouter);
 app.use('/api/audit-log', auditLogRouter);
 
 // Health check
