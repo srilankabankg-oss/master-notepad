@@ -18,7 +18,7 @@ export async function generateTaskNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const [result] = await db
     .select({
-      max: sql<number>`COALESCE(MAX(CAST(SUBSTRING(task_number FROM 9 FOR 5) AS INTEGER)), 0)`,
+      max: sql<number>`COALESCE(MAX(CAST(SUBSTRING(task_number FROM 11 FOR 5) AS INTEGER)), 0)`,
     })
     .from(schema.tasks)
     .where(like(schema.tasks.taskNumber, `TASK-${year}-%`));

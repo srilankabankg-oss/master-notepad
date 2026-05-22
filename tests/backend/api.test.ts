@@ -82,7 +82,8 @@ describe('Tasks', () => {
     }
   })
 
-  test('create, update status, delete', async () => {
+  test('create, update and delete', async () => {
+    // Create
     const cr = await fetch(`${API}/tasks`, {
       method: 'POST', headers: headers(),
       body: JSON.stringify({ protocolId: 1, title: 'Test task' }),
@@ -91,14 +92,16 @@ describe('Tasks', () => {
     const c = await cr.json()
     expect(c.taskNumber).toMatch(/^TASK-\d{4}-\d{5}$/)
 
+    // Update status
     const ur = await fetch(`${API}/tasks/${c.id}`, {
       method: 'PUT', headers: headers(),
       body: JSON.stringify({ status: 'in_progress' }),
     })
     expect(ur.status).toBe(200)
 
+    // Cannot delete non-created tasks (validated)
     const dr = await fetch(`${API}/tasks/${c.id}`, { method: 'DELETE', headers: headers() })
-    expect(dr.status).toBe(200)
+    expect(dr.status).toBe(422)
   })
 
   test('done requires resolutionText', async () => {
@@ -167,22 +170,35 @@ describe('Meetings v2', () => {
     }
   })
 
-  test('transition validates stages', async () => {
-    const r = await fetch(`${API}/meetings/1/transition`, {
-      method: 'PUT', headers: headers(),
-      body: JSON.stringify({ stage: 'conducting' }),
+  test('transition through stages', async () => {
+    // Create fresh meeting in draft
+    const cr = await fetch(`${API}/meetings`, {
+      method: 'POST', headers: headers(),
+      body: JSON.stringify({
+        title: 'Transition test', date: '2026-06-01T10:00:00Z', agenda: 'Test',
+        meetingType: 'problem', periodicity: 'one_time', groupingMethod: 'by_topic',
+      }),
     })
-    expect(r.status).toBe(200)
-    const b = await r.json()
-    expect(b.stage).toBe('conducting')
-  })
+    expect(cr.status).toBe(201)
+    const m = await cr.json()
+    expect(m.stage).toBe('draft')
 
-  test('invalid transition returns 422', async () => {
-    const r = await fetch(`${API}/meetings/1/transition`, {
+    // Valid: draft → preparation_clerk
+    const r1 = await fetch(`${API}/meetings/${m.id}/transition`, {
+      method: 'PUT', headers: headers(),
+      body: JSON.stringify({ stage: 'preparation_clerk' }),
+    })
+    expect(r1.status).toBe(200)
+
+    // Invalid: going backwards to draft
+    const r2 = await fetch(`${API}/meetings/${m.id}/transition`, {
       method: 'PUT', headers: headers(),
       body: JSON.stringify({ stage: 'draft' }),
     })
-    expect(r.status).toBe(422)
+    expect(r2.status).toBe(422)
+
+    // Cleanup
+    await fetch(`${API}/meetings/${m.id}`, { method: 'DELETE', headers: headers() })
   })
 
   test('create and read meeting v2', async () => {
