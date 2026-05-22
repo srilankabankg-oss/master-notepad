@@ -42,7 +42,7 @@ if [ "$SKIP_DB" = false ]; then
   elif docker ps -a --filter name=master-notepad-pg --format '{{.Names}}' | grep -q master-notepad-pg; then
     docker start master-notepad-pg > /dev/null 2>&1; echo "   Запущен"
   else
-    docker run -d --name master-notepad-pg -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=master_notepad -p 5433:5432 postgres:16-alpine > /dev/null 2>&1
+    docker run -d --name master-notepad-pg -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=master_notepad -p 5433:5432 pgvector/pgvector:pg16 > /dev/null 2>&1
     echo "   Создан и запущен"
   fi
 fi

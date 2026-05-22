@@ -62,7 +62,7 @@ docker run -d --name master-notepad-pg \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=master_notepad \
-  -p 5433:5432 postgres:16-alpine
+  -p 5433:5432 pgvector/pgvector:pg16
 
 # 3. Конфигурация
 cd backend
