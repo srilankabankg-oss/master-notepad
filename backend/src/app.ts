@@ -58,13 +58,16 @@ app.use(
 );
 
 // Rate limiting: 100 requests per 15 minutes per IP
-const limiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW_MS ? parseInt(process.env.RATE_LIMIT_WINDOW_MS) : 15 * 60 * 1000,
-  max: process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX) : 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api', limiter);
+// Set DISABLE_RATE_LIMIT=true to skip rate limiting (e.g., for tests)
+if (process.env.DISABLE_RATE_LIMIT !== 'true') {
+  const limiter = rateLimit({
+    windowMs: process.env.RATE_LIMIT_WINDOW_MS ? parseInt(process.env.RATE_LIMIT_WINDOW_MS) : 15 * 60 * 1000,
+    max: process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX) : 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use('/api', limiter);
+}
 
 app.use(express.json({ limit: '1mb' }));
 
