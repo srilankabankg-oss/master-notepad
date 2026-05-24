@@ -36,23 +36,19 @@ def build_prompt(question: str, sources: list[dict]) -> list[dict]:
 
 
 def generate(question: str, sources: list[dict]) -> tuple[str, float]:
-    client = OpenAI(
-        api_key=settings.llm_api_key,
-        base_url=settings.llm_api_url,
-    )
+    if not settings.llm_api_key:
+        parts = [f"[{s.get('entity_type','?')}] {s.get('content','')[:200]}" for s in sources[:5]]
+        fallback = f"LLM не настроен (нет API ключа). Найдено {len(sources)} релевантных записей:\n\n" + "\n".join(parts) if sources else "Ничего не найдено."
+        return fallback, 0.0
 
-    messages = build_prompt(question, sources)
-
-    response = client.chat.completions.create(
-        model=settings.llm_model,
-        messages=messages,
-        temperature=0.3,
-        max_tokens=1024,
-    )
-
-    answer = response.choices[0].message.content or ""
-    confidence = 1.0
-    if sources:
-        confidence = min(1.0, sum(s.get("score", 0) for s in sources) / len(sources))
-
-    return answer, confidence
+    try:
+        client = OpenAI(api_key=settings.llm_api_key, base_url=settings.llm_api_url)
+        messages = build_prompt(question, sources)
+        response = client.chat.completions.create(model=settings.llm_model, messages=messages, temperature=0.3, max_tokens=1024)
+        answer = response.choices[0].message.content or ""
+        confidence = min(1.0, sum(s.get("score", 0) for s in sources) / max(len(sources), 1))
+        return answer, confidence
+    except Exception as e:
+        parts = [f"[{s.get('entity_type','?')}] {s.get('content','')[:200]}" for s in sources[:5]]
+        fallback = f"LLM недоступен ({str(e)[:100]}). Найдено {len(sources)} записей:\n\n" + "\n".join(parts) if sources else "Ничего не найдено."
+        return fallback, 0.0
