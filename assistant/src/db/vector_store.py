@@ -1,5 +1,6 @@
 from __future__ import annotations
 import struct
+import json
 from typing import Any
 
 from pgvector.psycopg import register_vector_async
@@ -67,7 +68,7 @@ class VectorStore:
                 INSERT INTO embeddings (entity_type, entity_id, chunk_index, content, embedding, metadata)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (entity_type, entity_id, chunk_index, content, vec, metadata),
+                (entity_type, entity_id, chunk_index, content, vec, json.dumps(metadata)),
             )
 
     async def search(
