@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     database_url: str = "postgresql://postgres:postgres@localhost:5433/master_notepad"
-    main_api_url: str = "http://localhost:3001"
+    main_api_url: str = "http://localhost:3355"
     llm_api_url: str = "https://api.stepfun.com/step_plan/v1"
     llm_api_key: str = ""
     llm_model: str = "step-3.5-flash"
