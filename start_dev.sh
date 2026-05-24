@@ -68,13 +68,19 @@ for port in 3355 3356 3002; do
 done
 sleep 1
 
-# Backend
+# Backend FIRST (start and wait before frontend)
 if [ "$SKIP_BACKEND" = false ]; then
   echo ""; echo "Backend: http://localhost:3355"
   cd "$ROOT/backend"; npx tsx src/index.ts & BACKEND_PID=$!; cd "$ROOT"
+  # Wait until backend is ready
+  for i in $(seq 1 10); do
+    sleep 1
+    curl -s http://localhost:3355/api/health > /dev/null 2>&1 && break
+    [ $i -eq 10 ] && echo "   WARNING: backend didn't start in 10s"
+  done
 fi
 
-# Frontend
+# Frontend (after backend is ready)
 if [ "$SKIP_FRONTEND" = false ]; then
   echo "Frontend: http://localhost:3356"
   cd "$ROOT/frontend"; npx vite --port 3356 --strictPort & FRONTEND_PID=$!; cd "$ROOT"

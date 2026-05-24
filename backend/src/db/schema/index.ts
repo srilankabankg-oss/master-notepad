@@ -391,6 +391,24 @@ export const auditLog = pgTable('audit_log', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// ── External tables (not managed by Drizzle, but declared to prevent drops) ──
+export const session = pgTable('session', {
+  sid: varchar('sid').notNull(),
+  sess: jsonb('sess').notNull(),
+  expire: timestamp('expire', { precision: 6 }),
+});
+
+export const embeddings = pgTable('embeddings', {
+  id: serial('id').primaryKey(),
+  entityType: varchar('entity_type', { length: 50 }).notNull(),
+  entityId: integer('entity_id').notNull(),
+  chunkIndex: integer('chunk_index').default(0),
+  content: text('content').notNull(),
+  embedding: varchar('embedding'), // pgvector column, opaque to Drizzle
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
 // ── Relations ──
 export const employeesRelations = relations(employees, ({ many }) => ({
   reviews: many(reviews),
