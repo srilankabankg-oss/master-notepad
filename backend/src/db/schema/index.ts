@@ -393,7 +393,7 @@ export const auditLog = pgTable('audit_log', {
 
 // ── External tables (not managed by Drizzle, but declared to prevent drops) ──
 export const session = pgTable('session', {
-  sid: varchar('sid').notNull(),
+  sid: varchar('sid').primaryKey().notNull(),
   sess: jsonb('sess').notNull(),
   expire: timestamp('expire', { precision: 6 }),
 });
