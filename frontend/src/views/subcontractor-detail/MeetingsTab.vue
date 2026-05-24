@@ -122,7 +122,7 @@ async function deleteMeeting(id: number) {
       <div class="item-body"><strong>Повестка:</strong> {{ m.agenda }}</div>
       <div v-if="m.decisions" class="item-body"><strong>Решения:</strong> {{ m.decisions }}</div>
       <div v-if="m.notes" class="item-body"><strong>Заметки:</strong> {{ m.notes }}</div>
-      <div v-if="m.attendees.length" class="item-body"><strong>Участники:</strong> {{ m.attendees.join(', ') }}</div>
+      <div v-if="m.attendees?.length" class="item-body"><strong>Участники:</strong> {{ m.attendees.join(', ') }}</div>
     </div>
   </div>
 </template>

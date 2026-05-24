@@ -96,7 +96,7 @@ async function submitResponse() {
     <div v-for="s in subSurveys" :key="s.id" class="item-card">
       <div class="item-head">
         <span class="item-author">{{ s.title }}</span>
-        <span>{{ s.questions.length }} вопросов</span>
+        <span>{{ s.questions?.length || 0 }} вопросов</span>
         <span class="item-date">{{ s.createdAt }}</span>
         <BaseButton variant="ghost" size="sm" @click="openResponseForm(s)">Ответить</BaseButton>
         <BaseButton variant="ghost" size="sm" @click="deleteItem(s.id)">Удалить</BaseButton>

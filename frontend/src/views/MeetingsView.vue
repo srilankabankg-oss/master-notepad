@@ -137,7 +137,7 @@ onMounted(async () => {
             <strong>Заметки:</strong>
             <p>{{ m.notes }}</p>
           </div>
-          <div v-if="m.attendees.length" class="meeting-section">
+          <div v-if="m.attendees?.length" class="meeting-section">
             <strong>Участники:</strong>
             <p>{{ m.attendees.join(', ') }}</p>
           </div>
