@@ -14,7 +14,7 @@ const sortBy = ref<'name' | 'email' | 'position'>('name')
 const sortDir = ref<'asc' | 'desc'>('asc')
 
 const positions = computed(() => {
-  const set = new Set(store.items.map(e => e.position).filter(Boolean))
+  const set = new Set(store.items.map(e => e.position).filter((p): p is string => p != null))
   return Array.from(set).sort()
 })
 
