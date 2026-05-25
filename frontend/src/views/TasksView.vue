@@ -31,10 +31,10 @@ const getProtocolTitle = (id: number): string => {
 }
 
 const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
-  { value: 'submitted', label: 'Отправлена' },
-  { value: 'reviewing', label: 'На рассмотрении' },
-  { value: 'accepted', label: 'Принята' },
-  { value: 'rejected', label: 'Отклонена' },
+  { value: 'created', label: 'Создана' },
+  { value: 'in_progress', label: 'В работе' },
+  { value: 'done', label: 'Выполнена' },
+  { value: 'archived', label: 'Архив' },
 ]
 
 const { deleteItem } = useDeleteConfirm((id: number) => taskStore.remove(id), 'задачу')
@@ -44,8 +44,8 @@ const {
   openCreate, openEdit, closeForm, submitForm,
 } = useEntityForm<Task, TaskCreate>({
   entityName: 'Задача',
-  defaultCreateValues: { protocolId: 0, employeeId: 0, title: '', description: '', deadline: '' },
-  toCreateData: (t) => ({ protocolId: t.protocolId, employeeId: t.employeeId, title: t.title, description: t.description || '', deadline: t.deadline || '' }),
+  defaultCreateValues: { protocolId: 0, assigneeId: null as number | null, title: '', description: '', deadline: '' },
+  toCreateData: (t) => ({ protocolId: t.protocolId, assigneeId: t.assigneeId, title: t.title, description: t.description || '', deadline: t.deadline || '' }),
   onSubmit: async ({ isEdit, id, values }) => {
     if (isEdit && id) await taskStore.update(id, values)
     else await taskStore.create(values)
@@ -53,7 +53,7 @@ const {
   validate: () => {
     if (!formData.value.title.trim()) { formError.value = 'Название обязательно'; return false }
     if (!formData.value.protocolId) { formError.value = 'Выберите протокол'; return false }
-    if (!formData.value.employeeId) { formError.value = 'Выберите ответственного'; return false }
+    if (!formData.value.assigneeId) { formError.value = 'Выберите ответственного'; return false }
     return true
   },
 })
@@ -62,7 +62,7 @@ async function applyFilters() {
   await taskStore.fetchAll({
     status: filterStatus.value || undefined,
     protocolId: filterProtocolId.value || undefined,
-    employeeId: filterEmployeeId.value || undefined,
+    assigneeId: filterEmployeeId.value || undefined,
     search: searchText.value.trim() || undefined,
   })
 }
@@ -148,14 +148,14 @@ onMounted(async () => {
             <td class="cell-id" data-label="#">TASK-{{ t.id }}</td>
             <td class="cell-title" data-label="Название">{{ t.title }}</td>
             <td data-label="Статус">
-              <span :class="['status-badge', taskStatusClass(t.status)]">{{ taskStatusLabel(t.status) }}</span>
+              <span :class="['status-badge', taskStatusClass(t.status)]">{{ taskStatusLabel(t.status as TaskStatus) }}</span>
             </td>
-            <td data-label="Ответственный">{{ getEmployeeName(t.employeeId) }}</td>
+            <td data-label="Ответственный">{{ getEmployeeName(t.assigneeId ?? 0) }}</td>
             <td data-label="Срок">{{ t.deadline ? formatDate(t.deadline) : '—' }}</td>
             <td data-label="Протокол">{{ getProtocolTitle(t.protocolId) }}</td>
             <td @click.stop>
               <BaseButton size="sm" variant="ghost" @click="openEdit(t)">Изменить</BaseButton>
-              <BaseButton v-if="t.status !== 'accepted'" size="sm" variant="success" @click="markTaskDone(t.id)">Выполнить</BaseButton>
+              <BaseButton v-if="t.status !== 'done' && t.status !== 'archived'" size="sm" variant="success" @click="markTaskDone(t.id)">Выполнить</BaseButton>
               <BaseButton size="sm" variant="ghost" class="btn-danger-text" @click="deleteItem(t.id)">Удалить</BaseButton>
             </td>
           </tr>
@@ -174,7 +174,7 @@ onMounted(async () => {
         </label>
         <label class="field">
           <span class="field-label">Ответственный *</span>
-          <select v-model="formData.employeeId" class="input">
+          <select v-model="formData.assigneeId" class="input">
             <option :value="0" disabled>Выберите сотрудника</option>
             <option v-for="e in employeeStore.items" :key="e.id" :value="e.id">{{ e.name }}</option>
           </select>

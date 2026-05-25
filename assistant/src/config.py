@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     port: int = 3002
     log_level: str = "info"
 
-    model_config = {"env_file": "../../.env", "env_prefix": "", "extra": "allow"}
+    model_config = {"env_file": [".env", "../.env", "../../.env"], "env_prefix": "", "extra": "allow"}
 
 
 settings = Settings()

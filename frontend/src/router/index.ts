@@ -45,10 +45,15 @@ const router = createRouter({
       component: () => import('@/views/SurveysView.vue'),
     },
     {
-      path: '/tender/:id',
-      name: 'tender-summary',
-      component: () => import('@/views/TenderSummaryView.vue'),
-    },
+path: '/tender',
+    name: 'tender-select',
+    component: () => import('@/views/TenderSelectView.vue'),
+  },
+  {
+    path: '/tender/:id',
+    name: 'tender-summary',
+    component: () => import('@/views/TenderSummaryView.vue'),
+  },
     {
       path: '/employees',
       name: 'employees',

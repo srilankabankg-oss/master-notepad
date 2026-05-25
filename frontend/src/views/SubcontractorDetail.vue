@@ -83,11 +83,11 @@ const tabs = [
 
       <TabGroup v-model="activeTab" :tabs="tabs" />
 
-      <ReviewsTab :sub-id="subId" @refresh="loadAll" />
-      <CommentsTab :sub-id="subId" @refresh="loadAll" />
-      <MeetingsTab :sub-id="subId" @refresh="loadAll" />
-      <SurveysTab :sub-id="subId" @refresh="loadAll" />
-      <EventsTab :sub-id="subId" @refresh="loadAll" />
+      <ReviewsTab v-show="activeTab === 'reviews'" :sub-id="subId" @refresh="loadAll" />
+      <CommentsTab v-show="activeTab === 'comments'" :sub-id="subId" @refresh="loadAll" />
+      <MeetingsTab v-show="activeTab === 'meetings'" :sub-id="subId" @refresh="loadAll" />
+      <SurveysTab v-show="activeTab === 'surveys'" :sub-id="subId" @refresh="loadAll" />
+      <EventsTab v-show="activeTab === 'events'" :sub-id="subId" @refresh="loadAll" />
     </template>
 
     <div v-else class="state-message">Подрядчик не найден</div>

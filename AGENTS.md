@@ -155,11 +155,10 @@ uvicorn src.main:app --port 3002 --reload
 3. **Чек-листы**: Организационные и личные, предложения улучшений
 4. **Протоколы v2**: 7-этапный жизненный цикл, 4 типа, периодичность, группировка, AI этапа 3
 5. **Задачи**: TASK-YYYY-NNNNN нумерация, параллелизация между протоколами, цепочки
-6. **Организации**: Учёт юрлиц с ИНН, связи с договорами
-7. **RBAC**: 5 ролей (admin, clerk, controller, employee, contractors)
-8. **Уведомления**: Email (nodemailer) + Telegram (telegraf)
-9. **AI Ассистент**: RAG-чат + анализ тональности + поиск паттернов + транскрибация
-10. **Отчёты**: PDF-экспорт (puppeteer), Excel-импорт (xlsx)
+6. **RBAC**: 5 ролей (admin, clerk, controller, employee, contractors)
+7. **Уведомления**: Email (nodemailer) + Telegram (telegraf)
+8. **AI Ассистент**: RAG-чат + анализ тональности + поиск паттернов + транскрибация
+9. **Отчёты**: PDF-экспорт (puppeteer), Excel-импорт (xlsx)
 
 ## Development Commands
 ```bash

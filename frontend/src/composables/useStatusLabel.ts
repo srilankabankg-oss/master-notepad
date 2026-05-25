@@ -35,13 +35,13 @@ export function statusLabel(
  * @returns Localised label string
  */
 export function taskStatusLabel(
-  status: 'submitted' | 'reviewing' | 'accepted' | 'rejected',
+  status: 'created' | 'in_progress' | 'done' | 'archived',
 ): string {
-  const labels: Record<'submitted' | 'reviewing' | 'accepted' | 'rejected', string> = {
-    submitted: 'Отправлена',
-    reviewing: 'На рассмотрении',
-    accepted: 'Принята',
-    rejected: 'Отклонена',
+  const labels: Record<'created' | 'in_progress' | 'done' | 'archived', string> = {
+    created: 'Создана',
+    in_progress: 'В работе',
+    done: 'Выполнена',
+    archived: 'Архив',
   }
   return labels[status]
 }

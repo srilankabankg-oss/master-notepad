@@ -224,7 +224,7 @@ export const api = {
   },
 
   tasks: {
-    list: (params?: { status?: TaskStatus; protocolId?: number; employeeId?: number; search?: string }) =>
+    list: (params?: { status?: TaskStatus; protocolId?: number; assigneeId?: number; search?: string }) =>
       request<Task[]>(`/tasks${params ? `?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)] as [string, string])).toString()}` : ''}`),
     get: (id: number) => request<Task>(`/tasks/${id}`),
     create: (data: TaskCreate) =>

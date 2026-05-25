@@ -234,23 +234,53 @@ export interface Task {
   updatedAt: string
 }
 
-export type TaskStatus = 'submitted' | 'reviewing' | 'accepted' | 'rejected'
+export type TaskStatus = 'created' | 'in_progress' | 'done' | 'archived'
+
+export interface Task {
+  id: number
+  protocolId: number
+  sourceProtocolId: number | null
+  taskNumber: string
+  assigneeId: number | null
+  controllerId: number | null
+  title: string
+  description: string
+  status: TaskStatus
+  resolutionText: string | null
+  resolvedAt: string | null
+  sortOrder: number
+  parentTaskId: number | null
+  topicTag: string | null
+  subcontractorId: number | null
+  deadline: string | null
+  createdAt: string
+  updatedAt: string
+}
 
 export interface TaskCreate {
   protocolId: number
-  employeeId: number
   title: string
   description?: string
-  deadline?: string
+  assigneeId?: number | null
+  controllerId?: number | null
+  parentTaskId?: number | null
+  topicTag?: string
+  subcontractorId?: number | null
+  deadline?: string | null
+  sortOrder?: number
 }
 
 export interface TaskUpdate {
   protocolId?: number
-  employeeId?: number
+  assigneeId?: number | null
+  controllerId?: number | null
   title?: string
   description?: string
   status?: TaskStatus
-  deadline?: string
+  resolutionText?: string
+  topicTag?: string
+  subcontractorId?: number | null
+  deadline?: string | null
 }
 
 export interface TaskTransition {
@@ -380,10 +410,11 @@ export interface AskRequest {
 export interface AskResponse {
   answer: string
   sources: Array<{
-    entityType: string
-    entityId: number
-    title: string
-    excerpt: string
+    entity_type: string
+    entity_id: number
+    content: string
+    score: number
+    metadata: Record<string, unknown>
   }>
   confidence: number
 }

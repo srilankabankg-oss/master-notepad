@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useEmployeeStore } from '@/stores/employees'
 import type { EmployeeCreate } from '@/types/api'
 import { useEntityForm } from '@/composables/useEntityForm'
@@ -7,6 +7,61 @@ import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
 import Modal from '@/components/Modal.vue'
 
 const store = useEmployeeStore()
+
+const searchQuery = ref('')
+const positionFilter = ref('')
+const sortBy = ref<'name' | 'email' | 'position'>('name')
+const sortDir = ref<'asc' | 'desc'>('asc')
+
+const positions = computed(() => {
+  const set = new Set(store.items.map(e => e.position).filter(Boolean))
+  return Array.from(set).sort()
+})
+
+const filtered = computed(() => {
+  let list = [...store.items]
+
+  if (positionFilter.value) {
+    list = list.filter(e => e.position === positionFilter.value)
+  }
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase()
+    list = list.filter(e =>
+      e.name.toLowerCase().includes(q) ||
+      e.email.toLowerCase().includes(q) ||
+      (e.position || '').toLowerCase().includes(q)
+    )
+  }
+
+  list.sort((a, b) => {
+    const va = (a[sortBy.value] || '').toLowerCase()
+    const vb = (b[sortBy.value] || '').toLowerCase()
+    const cmp = va.localeCompare(vb)
+    return sortDir.value === 'asc' ? cmp : -cmp
+  })
+
+  return list
+})
+
+function toggleSort(col: 'name' | 'email' | 'position') {
+  if (sortBy.value === col) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = col
+    sortDir.value = 'asc'
+  }
+}
+
+function sortIndicator(col: 'name' | 'email' | 'position') {
+  if (sortBy.value !== col) return ''
+  return sortDir.value === 'asc' ? ' ▲' : ' ▼'
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  positionFilter.value = ''
+}
 
 const { showForm, editingId, formData, formError, formLoading, openCreate, openEdit, closeForm, submitForm } = useEntityForm({
   entityName: 'Сотрудник',
@@ -37,21 +92,36 @@ onMounted(() => {
       <button class="btn btn-primary" @click="openCreate">Добавить сотрудника</button>
     </div>
 
+    <div class="filter-bar">
+      <label class="filter-label">
+        Поиск:
+        <input v-model="searchQuery" type="text" class="input filter-input" placeholder="Имя, email или должность..." />
+      </label>
+      <label class="filter-label">
+        Должность:
+        <select v-model="positionFilter" class="input filter-select">
+          <option value="">Все</option>
+          <option v-for="pos in positions" :key="pos" :value="pos">{{ pos }}</option>
+        </select>
+      </label>
+      <button class="btn btn-sm btn-ghost" @click="clearFilters">Сбросить</button>
+    </div>
+
     <div v-if="store.loading" class="state-message">Загрузка...</div>
     <div v-else-if="store.error" class="state-message state-error">{{ store.error }}</div>
-    <div v-else-if="store.items.length === 0" class="state-message">Нет сотрудников</div>
+    <div v-else-if="filtered.length === 0" class="state-message">Нет сотрудников</div>
 
     <table v-else class="table">
       <thead>
         <tr>
-          <th>Имя</th>
-          <th>Email</th>
-          <th>Должность</th>
+          <th class="th-sortable" @click="toggleSort('name')">Имя{{ sortIndicator('name') }}</th>
+          <th class="th-sortable" @click="toggleSort('email')">Email{{ sortIndicator('email') }}</th>
+          <th class="th-sortable" @click="toggleSort('position')">Должность{{ sortIndicator('position') }}</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="emp in store.items" :key="emp.id">
+        <tr v-for="emp in filtered" :key="emp.id">
           <td class="cell-name" data-label="Имя">{{ emp.name }}</td>
           <td data-label="Email">{{ emp.email }}</td>
           <td data-label="Должность">{{ emp.position || '-' }}</td>
@@ -108,6 +178,31 @@ onMounted(() => {
   color: var(--color-text);
 }
 
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.filter-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.filter-input {
+  min-width: 16rem;
+}
+
+.filter-select {
+  min-width: 12rem;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -127,6 +222,16 @@ onMounted(() => {
   letter-spacing: 0.05em;
   background: var(--color-bg-subtle);
   border-bottom: 0.0625rem solid var(--color-border);
+}
+
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.th-sortable:hover {
+  color: var(--color-primary);
 }
 
 .table td {
@@ -250,6 +355,17 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-input,
+  .filter-select {
+    min-width: 0;
+    width: 100%;
   }
 
   .table thead {

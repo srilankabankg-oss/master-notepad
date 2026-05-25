@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, integer, timestamp, pgEnum, jsonb, boolean, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, text, integer, timestamp, pgEnum, jsonb, boolean, uniqueIndex, customType } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // ── Enums ──
@@ -396,6 +396,18 @@ export const session = pgTable('session', {
   sid: varchar('sid').primaryKey().notNull(),
   sess: jsonb('sess').notNull(),
   expire: timestamp('expire', { precision: 6 }),
+});
+
+// pgvector embeddings table — managed by Python AI assistant, declared here so drizzle-kit doesn't drop it
+const vector768 = customType<{ data: number[] }>({ dataType: () => 'vector(768)' });
+export const embeddings = pgTable('embeddings', {
+  id: serial('id').primaryKey(),
+  entityType: varchar('entity_type', { length: 50 }).notNull(),
+  entityId: integer('entity_id').notNull(),
+  chunkIndex: integer('chunk_index').notNull().default(0),
+  content: text('content').notNull(),
+  embedding: vector768('embedding'),
+  metadata: jsonb('metadata').default({}),
 });
 
 // ── Relations ──

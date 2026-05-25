@@ -22,17 +22,18 @@ const navItems = [
   { to: '/reviews', label: 'Отзывы', name: 'reviews' },
   { to: '/checklists', label: 'Чек-листы', name: 'checklists' },
   { to: '/meetings', label: 'Протоколы', name: 'meetings' },
+  { to: '/tasks', label: 'Задачи', name: 'tasks' },
   { to: '/surveys', label: 'Опросы', name: 'surveys' },
   { to: '/employees', label: 'Сотрудники', name: 'employees' },
   { to: '/suggestions', label: 'Предложения', name: 'suggestions' },
   { to: '/events', label: 'События', name: 'events' },
   { to: '/chat', label: 'Ассистент', name: 'chat' },
   { to: '/audit-log', label: 'Журнал изменений', name: 'audit-log' },
-  { to: '/tender/1', label: 'Тендерная справка', name: 'tender-summary' },
+  { to: '/tender', label: 'Тендерные справки', name: 'tender-select' },
 ]
 
 function isActive(name: string) {
-  return route.name === name || (name === 'subcontractors' && route.name === 'subcontractor-detail') || (name === 'tender-summary' && route.name === 'tender-summary')
+  return route.name === name || (name === 'subcontractors' && route.name === 'subcontractor-detail') || (name === 'tender-select' && route.name === 'tender-summary')
 }
 </script>
 

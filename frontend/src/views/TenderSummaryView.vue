@@ -38,7 +38,7 @@ onMounted(async () => {
 
 <template>
   <div class="view">
-    <button class="btn btn-back" @click="router.push('/subcontractors')">← Назад к списку подрядчиков</button>
+    <button class="btn btn-back" @click="router.push('/tender')">← Назад к списку</button>
 
     <div v-if="loading" class="state-message">Загрузка...</div>
     <div v-else-if="error" class="state-message state-error">{{ error }}</div>

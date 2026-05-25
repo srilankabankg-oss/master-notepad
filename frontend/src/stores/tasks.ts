@@ -8,7 +8,7 @@ export const useTaskStore = defineStore('tasks', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchAll(params?: { status?: TaskStatus; protocolId?: number; employeeId?: number; search?: string }) {
+  async function fetchAll(params?: { status?: TaskStatus; protocolId?: number; assigneeId?: number; search?: string }) {
     loading.value = true
     error.value = null
     try {

@@ -95,9 +95,9 @@ function onKeydown(e: KeyboardEvent) {
                 :key="si"
                 class="chat-source-card"
               >
-                <span class="chat-source-type">{{ src.entityType }}</span>
-                <span class="chat-source-title">{{ src.title }}</span>
-                <p class="chat-source-excerpt">{{ src.excerpt }}</p>
+                <span class="chat-source-type">{{ src.entity_type }}</span>
+                <span class="chat-source-title">{{ src.content.slice(0, 80) }}</span>
+                <p class="chat-source-excerpt">{{ src.content }}</p>
               </div>
             </div>
           </div>

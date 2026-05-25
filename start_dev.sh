@@ -46,14 +46,13 @@ echo ""; echo "Dependencies..."
 # Config
 echo ""; echo "Config..."
 [ ! -f "backend/.env" ] && cp backend/.env.example backend/.env && echo "   backend/.env created"
+[ ! -f "assistant/.env" ] && cp assistant/.env.example assistant/.env && echo "   assistant/.env created"
 
 # DB schema
 if [ "$SKIP_DB" = false ] && [ "$SKIP_BACKEND" = false ]; then
-  echo ""; echo "DB schema..."
+echo ""; echo "DB schema..."
   npm run db:push -w backend || fail "DB push failed"
-  # Create session table (used by express-session)
-  docker exec master-notepad-pg psql -U postgres -d master_notepad -c \
-    "CREATE TABLE IF NOT EXISTS \"session\" (sid varchar NOT NULL, sess json NOT NULL, expire timestamp(6) NOT NULL, CONSTRAINT session_pkey PRIMARY KEY (sid)); CREATE INDEX IF NOT EXISTS \"IDX_session_expire\" ON \"session\" (expire);" > /dev/null 2>&1 || true
+
 fi
 
 # Seed
