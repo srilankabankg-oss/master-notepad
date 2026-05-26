@@ -1,13 +1,29 @@
 #!/bin/bash
 # Master Notepad — Production Deploy
+# Usage: ./deploy.sh [--no-ai]
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
+
+WITH_AI=true
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-ai) WITH_AI=false ;;
+    --help|-h)
+      echo "Usage: ./deploy.sh [--no-ai]"
+      echo "  --no-ai  Deploy without AI assistant (hides AI tab in frontend)"
+      exit 0 ;;
+    *) echo "Unknown: $1"; exit 1 ;;
+  esac
+  shift
+done
 
 fail() { echo "FAIL: $1"; exit 1; }
 check() { command -v "$1" >/dev/null 2>&1 || fail "$1 not found (install it first)"; }
 
 echo "Master Notepad — Production Deploy"
+[ "$WITH_AI" = false ] && echo "(without AI assistant)"
 echo "==================================="
 
 echo ""; echo "Prerequisites..."
@@ -27,7 +43,11 @@ fi
 
 # Build
 echo ""; echo "Building..."
-npm run build || fail "Build failed"
+if [ "$WITH_AI" = false ]; then
+  VITE_ENABLE_AI=false npm run build || fail "Build failed"
+else
+  npm run build || fail "Build failed"
+fi
 [ -f "backend/dist/index.js" ] || fail "backend/dist/index.js not found"
 [ -d "frontend/dist" ] || fail "frontend/dist/ not found"
 
