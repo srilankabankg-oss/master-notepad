@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const publicRoutes = ['/login', '/register']
+const enableAI = import.meta.env.VITE_ENABLE_AI !== 'false'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -79,11 +80,11 @@ path: '/tender',
       name: 'task-detail',
       component: () => import('@/views/TasksView.vue'),
     },
-    {
+    ...(enableAI ? [{
       path: '/chat',
       name: 'chat',
       component: () => import('@/views/ChatView.vue'),
-    },
+    }] : []),
     {
       path: '/audit-log',
       name: 'audit-log',

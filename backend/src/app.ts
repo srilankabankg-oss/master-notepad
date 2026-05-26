@@ -19,6 +19,7 @@ import { eventsRouter } from './routes/events.js';
 import { tenderRouter } from './routes/tender.js';
 import { organizationsRouter } from './routes/organizations.js';
 import { aiRouter } from './routes/ai.js';
+import { bugsRouter } from './routes/bugs.js';
 import { authRouter } from './routes/auth.js';
 import { auditLogRouter } from './routes/audit.js';
 import { errorHandler } from './middleware/error-handler.js';
@@ -89,6 +90,7 @@ app.use('/api/ai', aiRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/audit-log', auditLogRouter);
+app.use('/api/bugs', bugsRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

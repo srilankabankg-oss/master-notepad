@@ -268,10 +268,14 @@ export const api = {
     me: () => request<AuthEmployee>('/auth/me'),
   },
 
-  ai: {
-    ask: (data: AskRequest) =>
+ai: {
+    ask: (data: { question: string }) =>
       request<AskResponse>('/ai/ask', { method: 'POST', body: JSON.stringify(data) }),
-    health: () => request<{ status: string }>('/ai/health'),
+  },
+
+  bugs: {
+    report: (data: { page: string; description: string }) =>
+      request<{ ok: boolean }>('/bugs', { method: 'POST', body: JSON.stringify(data) }),
   },
 
   audit: {

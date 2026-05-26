@@ -17,7 +17,10 @@ watch(() => route.path, () => {
   sidebarOpen.value = false
 })
 
-const navItems = [
+const isDev = import.meta.env.DEV
+const enableAI = import.meta.env.VITE_ENABLE_AI !== 'false'
+
+const navItemsRaw = [
   { to: '/subcontractors', label: 'Подрядчики', name: 'subcontractors' },
   { to: '/reviews', label: 'Отзывы', name: 'reviews' },
   { to: '/checklists', label: 'Чек-листы', name: 'checklists' },
@@ -27,10 +30,12 @@ const navItems = [
   { to: '/employees', label: 'Сотрудники', name: 'employees' },
   { to: '/suggestions', label: 'Предложения', name: 'suggestions' },
   { to: '/events', label: 'События', name: 'events' },
-  { to: '/chat', label: 'Ассистент', name: 'chat' },
+  ...(enableAI ? [{ to: '/chat', label: 'Ассистент', name: 'chat' }] : []),
   { to: '/audit-log', label: 'Журнал изменений', name: 'audit-log' },
   { to: '/tender', label: 'Тендерные справки', name: 'tender-select' },
 ]
+
+const navItems = navItemsRaw
 
 function isActive(name: string) {
   return route.name === name || (name === 'subcontractors' && route.name === 'subcontractor-detail') || (name === 'tender-select' && route.name === 'tender-summary')

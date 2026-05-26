@@ -82,6 +82,9 @@ fi
 # Frontend (after backend is ready)
 if [ "$SKIP_FRONTEND" = false ]; then
   echo "Frontend: http://localhost:3356"
+  if [ "$SKIP_AI" = true ]; then
+    export VITE_ENABLE_AI=false
+  fi
   cd "$ROOT/frontend"; npx vite --port 3356 --strictPort & FRONTEND_PID=$!; cd "$ROOT"
 fi
 
