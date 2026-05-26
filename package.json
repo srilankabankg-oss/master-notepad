@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend && npm run build -w frontend",
+    "build:no-ai": "VITE_ENABLE_AI=false npm run build -w frontend && npm run build -w backend",
+    "dev:no-ai": "VITE_ENABLE_AI=false concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "db:generate": "npm run db:generate -w backend",
     "db:migrate": "npm run db:migrate -w backend",
     "db:push": "npm run db:push -w backend",
