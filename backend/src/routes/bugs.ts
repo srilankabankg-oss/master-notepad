@@ -1,12 +1,14 @@
 import { Router } from 'express'
 import { appendFileSync } from 'fs'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import { requireAuth, getEmployeeId } from '../middleware/auth.js'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const LOG_PATH = join(__dirname, '..', '..', 'user_bugs.log')
 
 export const bugsRouter = Router()
 bugsRouter.use(requireAuth)
-
-const LOG_PATH = join(process.cwd(), 'user_bugs.log')
 
 bugsRouter.post('/', (req, res) => {
   const { page, description } = req.body
